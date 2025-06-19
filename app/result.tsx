@@ -106,7 +106,6 @@ export default function ResultScreen() {
         <>
           <Text style={styles.description}>{data.description}</Text>
           <Text style={styles.subheading}>Suggested Majors:</Text>
-
           {data.majors.map((major, index) => (
             <Pressable
               key={index}

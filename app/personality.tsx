@@ -63,7 +63,7 @@ export default function PersonalityScreen() {
       setCurrent(current + 1);
     } else {
       const result = calculateMBTI(updatedAnswers);
-      router.push(`/result?type = ${result}`);
+      router.push(`/result?type=${result}`);
     }
   };
 
