@@ -111,6 +111,11 @@ export default function ResultScreen() {
               key={index}
               style={styles.majorButton}
               // onPress={() => router.push(`/game?major=${major}`)}
+              onPress={() => {
+    if (result === "ESFP" && major === "Performing Arts") {
+      router.push("/artsmajorgame");
+    }
+  }}
             >
               <Text style={styles.majorText}>{major}</Text>
             </Pressable>
