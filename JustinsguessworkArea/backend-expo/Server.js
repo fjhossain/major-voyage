@@ -10,7 +10,7 @@ app.use(express.json());
 
 const db = mysql.createConnection({
     host: 'localhost',
-    user: 'mainCsi_4999',
+    user: 'CSI4999App',
     password: 'thiscsi4999(r@p',
     database: 'csi-4999projectset'
 });
