@@ -12,7 +12,7 @@ const db = mysql.createConnection({
     host: 'localhost',
     user: 'CSI4999App',
     password: 'thiscsi4999(r@p',
-    database: 'csi-4999projectset'
+    database: 'csi_4999projectset'
 });
 
 db.connect(err => {
