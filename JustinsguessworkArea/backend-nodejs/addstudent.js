@@ -20,12 +20,40 @@ function decryptData(encrypted, timeBasedKey) {
         content: encrypted
     };
 }
-
+/*
+const inputvariables = {
+            studentId,
+            firstName,
+            lastName,
+            STUDENT_EMAIL,
+            password,
+            persona1,
+            persona2,
+            persona3,
+            persona4,
+            dateCreated,
+            selectedDegreeNo
+        };
+*/
 async function storeEncryptedNewUser(inputvariables, dbConfig) {
     try{    
+        const {
+            studentId,
+            firstName,
+            lastName,
+            STUDENT_EMAIL,
+            password,
+            persona1,
+            persona2,
+            persona3,
+            persona4,
+            thistime,
+            selectedDegreeNo
+        } = inputvariables;
         //recieved user request, now acting on the user request first decrypt the pass
-        const decryptedPassword = decryptdata(inputvariables.encryptedField, inputvariables.timeKey);
-
+        const decryptedPassword = decryptdata(password, thistime);
+        
+        
         //generate timestamp for the db and response encryption
         const now = Date.now();
 
@@ -35,8 +63,21 @@ async function storeEncryptedNewUser(inputvariables, dbConfig) {
         //store it in Mysql
         const connection = await mysql.createConnection(dbConfig);
         await connection.execute(
-            'INSERT INTO '
-        )
+            'INSERT INTO `csi_4999projectset`.`students` (`STUDENT_NO`, `STUDENT_ID`, `STUDENT_FNAME`, `STUDENT_LNAME`, `STUDENT_EMAIL`, `PASSWORD_ENCRYPT`, `PERSONA_TEST_1`, `PERSONA_TEST_2`, `PERSONA_TEST_3`, `PERSONA_TEST_4`, `STUDENT_CREATION_TIME`, `SELECTED_DEGREE_NO`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);', 
+            [
+                studentId,
+                firstName,
+                lastName,
+                STUDENT_EMAIL,
+                encryptForDB,
+                persona1,
+                persona2,
+                persona3,
+                persona4,
+                now,
+                selectedDegreeNo
+            ]
+        );
         await connection.end();
 
         //now to encrypt the response password with a new date!
@@ -50,11 +91,12 @@ async function storeEncryptedNewUser(inputvariables, dbConfig) {
             timestamp: now,
             passwordEncrypt:encryptForResponse
         });
-
+        const encryptedResponse = encryptData(responseMessage, now)
         return {
             success: true,
             timestamp: now,
             iv: encryptedResponse.iv,
+            content:encryptedResponse.content
         };
     } catch (error) {
         const now = Date.now();
