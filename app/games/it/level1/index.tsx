@@ -11,6 +11,8 @@ const problems = [
 ];
 
 export default function Page() {
+  console.log("Level 1 index.tsx loaded");
+  
   const [matches, setMatches] = useState({});
   const [score, setScore] = useState(0);
   const router = useRouter();
