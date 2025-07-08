@@ -1,19 +1,9 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import { View, Text, StyleSheet } from 'react-native';
 
-export default function MajorITScreen() {
-  const router = useRouter();
-
+export default function ItMajorScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to IT Mini-Game!</Text>
-
-      <Pressable
-        style={styles.button}
-        onPress={() => router.push("/games/it/level1")}
-      >
-        <Text style={styles.buttonText}> Start Level 1: Troubleshoot IT</Text>
-      </Pressable>
+      <Text style={styles.text}>Welcome to the IT Mini Game Menu </Text>
     </View>
   );
 }
@@ -21,22 +11,13 @@ export default function MajorITScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#e0f7fa',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 32,
-  },
-  button: {
-    backgroundColor: "#6366f1",
-    padding: 16,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 18,
+  text: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
   },
 });
