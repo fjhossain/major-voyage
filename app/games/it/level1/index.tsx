@@ -10,7 +10,7 @@ const problems = [
   { id: '3', problem: 'No sound', solution: 'Check speakers' },
 ];
 
-export default function Page() {
+export default function Level1Game() {
   console.log("Level 1 index.tsx loaded");
   
   const [matches, setMatches] = useState({});
