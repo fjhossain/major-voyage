@@ -111,13 +111,15 @@ export default function ResultScreen() {
               key={index}
               style={styles.majorButton}
               // onPress={() => router.push(`/game?major=${major}`)}
-               onPress={() => {
-                  if (major === "Information Technology") {
-                      router.push("/majors/it");
+                 onPress={() => {
+                   console.log("Clicked major:", major);
+                 if (major === "Information Technology") {
+                       router.push("/majors/it");
                   } else {
-                    alert(`Mini-game for "${major}" is coming soon!`);
+                   alert(`Mini-game for "${major}" is coming soon!`);
                   }
-                 }}
+                  }}
+
 
             >
               <Text style={styles.majorText}>{major}</Text>
