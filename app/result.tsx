@@ -88,10 +88,9 @@ const personalityData: Record<
   },
 };
 
-// Utility function to normalize major names to lowercase trimmed strings
 const normalizeMajor = (major: string) => major.trim().toLowerCase();
 
-const majorRouteMap: Record<string, string> = {
+const majorRouteMap = {
   "computer science": "/games/compGame",
   finance: "/games/financeGame",
   accounting: "/games/accountingGame",
@@ -122,24 +121,23 @@ const majorRouteMap: Record<string, string> = {
   counseling: "/games/counselingGame",
   communications: "/games/communicationsGame",
   law: "/games/lawGame",
-  // Add more as needed
-};
+} as const;
+
+type MajorKeys = keyof typeof majorRouteMap;
 
 export default function ResultScreen() {
   const { type } = useLocalSearchParams();
   const router = useRouter();
 
-  // Ensure result is uppercase for personalityData lookup
   const result = typeof type === "string" ? type.toUpperCase() : "";
-
-  // Get personality data for this type
   const data = personalityData[result];
 
-  // When a major button is pressed, normalize and push to the correct game screen
   const handleMajorPress = (major: string) => {
     const key = normalizeMajor(major);
-    if (majorRouteMap[key]) {
-      router.push(majorRouteMap[key]);
+
+    if (key in majorRouteMap) {
+      const route = majorRouteMap[key as MajorKeys];
+      router.push(route as unknown as Parameters<typeof router.push>[0]);
     } else {
       alert(`No game screen found for major: ${major}`);
     }
@@ -153,13 +151,10 @@ export default function ResultScreen() {
       end={{ x: 0.9, y: 0.9 }}
     >
       <Text style={styles.title}>Your Personality Type: {result}</Text>
-
       {data ? (
         <>
           <Text style={styles.description}>{data.description}</Text>
-
           <Text style={styles.subheading}>Suggested Majors:</Text>
-
           {data.majors.map((major, index) => (
             <Pressable
               key={index}
