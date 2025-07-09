@@ -186,6 +186,7 @@ const styles = StyleSheet.create({
     color: '#000000',
     marginBottom: 10,
     textAlign: 'center',
+    fontFamily: undefined, // uses system font
   },
   instructionsTitle: {
     fontSize: 20,
@@ -193,12 +194,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: '#000000',
     fontWeight: '600',
+    fontFamily: undefined,
   },
   instructions: {
     fontSize: 16,
     color: '#000000',
     textAlign: 'center',
     paddingHorizontal: 20,
+    fontFamily: undefined,
   },
   container: {
     flex: 1,
@@ -211,11 +214,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: 'center',
     color: '#000000',
+    fontFamily: undefined,
   },
   timer: {
     fontSize: 18,
     color: '#FF0000',
     marginBottom: 10,
+    fontFamily: undefined,
   },
   line: {
     fontSize: 22,
@@ -223,6 +228,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 20,
     color: '#000000',
+    fontFamily: undefined,
   },
   wordContainer: {
     flexDirection: 'row',
@@ -239,17 +245,20 @@ const styles = StyleSheet.create({
   wordText: {
     fontSize: 16,
     color: '#4a148c',
+    fontFamily: undefined,
   },
   selectedText: {
     fontSize: 18,
     marginVertical: 10,
     textAlign: 'center',
     color: '#000000',
+    fontFamily: undefined,
   },
   score: {
     fontSize: 24,
     marginVertical: 20,
     color: '#FF0000',
     fontWeight: 'bold',
+    fontFamily: undefined,
   },
 });
