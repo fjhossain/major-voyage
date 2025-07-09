@@ -111,7 +111,7 @@ export default function ResultScreen() {
               key={index}
               style={styles.majorButton}
                // onPress={() => router.push(`/game?major=${major}`)}
-                 onPress={() => router.push("/majors/it")}
+                
 
                  
             >
