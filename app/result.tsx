@@ -147,7 +147,7 @@ export default function ResultScreen() {
 
   return (
     <LinearGradient
-      colors={["#d0e6ff", "#e0c3fc", "#f8f9fa"]}
+      colors={["#d0e6ff", "#c3b9fc", "#f8f9fa"]}
       style={styles.container}
       start={{ x: 0.1, y: 0.1 }}
       end={{ x: 0.9, y: 0.9 }}
