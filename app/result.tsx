@@ -88,11 +88,62 @@ const personalityData: Record<
   },
 };
 
+// Utility function to normalize major names to lowercase trimmed strings
+const normalizeMajor = (major: string) => major.trim().toLowerCase();
+
+const majorRouteMap: Record<string, string> = {
+  "computer science": "/games/compGame",
+  finance: "/games/financeGame",
+  accounting: "/games/accountingGame",
+  "criminal justice": "/games/criminalJusticeGame",
+  nursing: "/games/nursingGame",
+  "social work": "/games/socialWorkGame",
+  psychology: "/games/psychologyGame",
+  education: "/games/educationGame",
+  engineering: "/games/engineeringGame",
+  "data science": "/games/dataScienceGame",
+  "mechanical engineering": "/games/mechanicalEngineeringGame",
+  "information technology": "/games/infoTechGame",
+  "graphic design": "/games/graphicDesignGame",
+  "interior design": "/games/interiorDesignGame",
+  "creative writing": "/games/creativeWritingGame",
+  "human services": "/games/humanServicesGame",
+  philosophy: "/games/philosophyGame",
+  "business administration": "/games/businessAdminGame",
+  "sports management": "/games/sportsManagementGame",
+  "performing arts": "/games/performingArtsGame",
+  "hospitality management": "/games/hospitalityManagementGame",
+  marketing: "/games/marketingGame",
+  journalism: "/games/journalismGame",
+  entrepreneurship: "/games/entrepreneurshipGame",
+  "political science": "/games/politicalScienceGame",
+  management: "/games/managementGame",
+  "public administration": "/games/publicAdminGame",
+  counseling: "/games/counselingGame",
+  communications: "/games/communicationsGame",
+  law: "/games/lawGame",
+  // Add more as needed
+};
+
 export default function ResultScreen() {
   const { type } = useLocalSearchParams();
   const router = useRouter();
+
+  // Ensure result is uppercase for personalityData lookup
   const result = typeof type === "string" ? type.toUpperCase() : "";
+
+  // Get personality data for this type
   const data = personalityData[result];
+
+  // When a major button is pressed, normalize and push to the correct game screen
+  const handleMajorPress = (major: string) => {
+    const key = normalizeMajor(major);
+    if (majorRouteMap[key]) {
+      router.push(majorRouteMap[key]);
+    } else {
+      alert(`No game screen found for major: ${major}`);
+    }
+  };
 
   return (
     <LinearGradient
@@ -102,15 +153,18 @@ export default function ResultScreen() {
       end={{ x: 0.9, y: 0.9 }}
     >
       <Text style={styles.title}>Your Personality Type: {result}</Text>
+
       {data ? (
         <>
           <Text style={styles.description}>{data.description}</Text>
+
           <Text style={styles.subheading}>Suggested Majors:</Text>
+
           {data.majors.map((major, index) => (
             <Pressable
               key={index}
               style={styles.majorButton}
-              // onPress={() => router.push(`/game?major=${major}`)}
+              onPress={() => handleMajorPress(major)}
             >
               <Text style={styles.majorText}>{major}</Text>
             </Pressable>
