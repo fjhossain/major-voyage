@@ -110,8 +110,8 @@ export default function ResultScreen() {
             <Pressable
               key={index}
               style={styles.majorButton}
-               // onPress={() => router.push(`/game?major=${major}`)}
-                 onPress={() => router.push("/majors/it")}
+                onPress={() => router.push(`/game?major=${major}`)}
+                // onPress={() => router.push("/majors/it")}
 
                  
             >
