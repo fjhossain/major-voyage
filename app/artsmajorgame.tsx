@@ -1,34 +1,38 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
 import {
-  Button,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 
 const LINES: string[] = [
   "To be or not to be",
   "All the world's a stage",
-  "The play's the thing"
+  "The play's the thing",
+  "Brevity is the soul of wit",
+  "Some are born great",
+  "Et tu, Brute"
 ];
 
 const GAME_TIME = 10;
 
 export default function App() {
-  const [started, setStarted] = useState<boolean>(false);
-  const [level, setLevel] = useState<number>(0);
-  const [showLine, setShowLine] = useState<boolean>(true);
+  const [started, setStarted] = useState(false);
+  const [level, setLevel] = useState(0);
+  const [showLine, setShowLine] = useState(true);
   const [shuffledWords, setShuffledWords] = useState<string[]>([]);
   const [selectedWords, setSelectedWords] = useState<string[]>([]);
-  const [score, setScore] = useState<number>(0);
-  const [timeLeft, setTimeLeft] = useState<number>(GAME_TIME);
-  const [gameOver, setGameOver] = useState<boolean>(false);
+  const [score, setScore] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(GAME_TIME);
+  const [gameOver, setGameOver] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
-  const currentLine: string = LINES[level];
+  const currentLine = LINES[level];
 
   useEffect(() => {
     if (!started || gameOver) return;
@@ -41,7 +45,6 @@ export default function App() {
     setTimeLeft(GAME_TIME);
 
     const hideTimer = setTimeout(() => setShowLine(false), 3000);
-
     const countdown = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -72,6 +75,7 @@ export default function App() {
 
     if (level + 1 >= LINES.length) {
       setGameOver(true);
+      setShowModal(true);
     } else {
       setLevel((prev) => prev + 1);
     }
@@ -84,9 +88,24 @@ export default function App() {
     setTimeLeft(GAME_TIME);
     setSelectedWords([]);
     setStarted(false);
+    setShowModal(false);
   };
 
-  // Start Screen
+  const getFinalMessage = () => {
+    const percent = (score / LINES.length) * 100;
+    if (percent >= 70) {
+      return {
+        title: "🎉 Congratulations!",
+        message: `You passed with ${Math.round(percent)}%!`,
+      };
+    }
+    return {
+      title: "📘 Game Over",
+      message: `You scored ${score} out of ${LINES.length}. Better luck next time!`,
+    };
+  };
+
+  // Start screen
   if (!started) {
     return (
       <LinearGradient colors={['#6a0dad', '#E6E6FA']} style={styles.gradient}>
@@ -97,7 +116,9 @@ export default function App() {
           <Animatable.Text animation="zoomIn" style={styles.emoji}>
             🎭
           </Animatable.Text>
-          <Button title="Start Game" onPress={() => setStarted(true)} />
+          <TouchableOpacity style={styles.startButton} onPress={() => setStarted(true)}>
+            <Text style={styles.startButtonText}>Start Game</Text>
+          </TouchableOpacity>
           <Text style={styles.instructionsTitle}>How to Play:</Text>
           <Text style={styles.instructions}>
             • Memorize the line shown.{"\n"}
@@ -109,24 +130,7 @@ export default function App() {
     );
   }
 
-  // Game Over Screen
-  if (gameOver) {
-    return (
-      <LinearGradient colors={['#6a0dad', '#E6E6FA']} style={styles.gradient}>
-        <View style={styles.container}>
-          <Animatable.Text animation="fadeInDown" style={styles.title}>
-            🎭 Game Over!
-          </Animatable.Text>
-          <Animatable.Text animation="zoomIn" duration={800} style={styles.score}>
-            Your Score: {score} / {LINES.length}
-          </Animatable.Text>
-          <Button title="Play Again" onPress={resetGame} />
-        </View>
-      </LinearGradient>
-    );
-  }
-
-  // Game Screen
+  // Game screen
   return (
     <LinearGradient colors={['#6a0dad', '#E6E6FA']} style={styles.gradient}>
       <View style={styles.container}>
@@ -157,14 +161,37 @@ export default function App() {
             <Text style={styles.selectedText}>
               Selected: {selectedWords.join(' ')}
             </Text>
-            <Button title="Submit" onPress={handleSubmit} />
+            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+              <Text style={styles.submitButtonText}>Submit</Text>
+            </TouchableOpacity>
           </>
         )}
+
+        {/* Modal for final score */}
+        <Modal visible={showModal} transparent animationType="slide">
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text
+                style={[
+                  styles.modalTitle,
+                  { color: getFinalMessage().title.includes("🎉") ? "#4CAF50" : "#D32F2F" },
+                ]}
+              >
+                {getFinalMessage().title}
+              </Text>
+              <Text style={styles.modalMessage}>{getFinalMessage().message}</Text>
+              <TouchableOpacity style={styles.startButton} onPress={resetGame}>
+                <Text style={styles.startButtonText}>Play Again</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </View>
     </LinearGradient>
   );
 }
 
+// Styles
 const styles = StyleSheet.create({
   gradient: {
     flex: 1,
@@ -175,42 +202,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 24,
   },
-  emoji: {
-    fontSize: 120,
-    marginBottom: 40,
-    textAlign: 'center',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#000000',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  instructionsTitle: {
-    fontSize: 20,
-    marginTop: 40,
-    marginBottom: 10,
-    color: '#000000',
-    fontWeight: '600',
-  },
-  instructions: {
-    fontSize: 16,
-    color: '#000000',
-    textAlign: 'center',
-    paddingHorizontal: 20,
-  },
   container: {
     flex: 1,
     padding: 24,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  emoji: {
+    fontSize: 120,
+    marginBottom: 40,
+    textAlign: 'center',
+  },
   subtitle: {
     fontSize: 20,
     marginBottom: 10,
     textAlign: 'center',
-    color: '#000000',
+    color: '#000',
   },
   timer: {
     fontSize: 18,
@@ -222,7 +236,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     textAlign: 'center',
     marginVertical: 20,
-    color: '#000000',
+    color: '#000',
   },
   wordContainer: {
     flexDirection: 'row',
@@ -244,12 +258,63 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginVertical: 10,
     textAlign: 'center',
-    color: '#000000',
+    color: '#000',
   },
-  score: {
-    fontSize: 24,
-    marginVertical: 20,
-    color: '#FF0000',
+  submitButton: {
+    backgroundColor: '#7e57c2',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 10,
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  startButton: {
+    backgroundColor: '#6a0dad',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 10,
+    marginTop: 20,
+  },
+  startButtonText: {
+    color: '#fff',
+    fontSize: 18,
+  },
+  instructionsTitle: {
+    fontSize: 20,
+    marginTop: 40,
+    marginBottom: 10,
+    color: '#000',
+    fontWeight: '600',
+  },
+  instructions: {
+    fontSize: 16,
+    color: '#000',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 30,
+    alignItems: 'center',
+    width: '80%',
+  },
+  modalTitle: {
+    fontSize: 28,
     fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  modalMessage: {
+    fontSize: 20,
+    marginBottom: 20,
+    textAlign: 'center',
   },
 });
