@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-
+import 'react-native-gesture-handler';
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
