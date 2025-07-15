@@ -6,16 +6,17 @@ import {
   Text,
   StyleSheet,
   Pressable,
-  //Image,
+ // Image,
   Alert,
   LayoutRectangle,
 } from 'react-native';
-import { PanGestureHandler } from 'react-native-gesture-handler';
+import { PanGestureHandler, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
+  useSharedValue,
   useAnimatedGestureHandler,
   useAnimatedStyle,
-  useSharedValue,
   withSpring,
+  runOnJS,
 } from 'react-native-reanimated';
 
 const problems = [
@@ -30,6 +31,43 @@ const solutions = [
   'Check speakers',
 ];
 
+type DraggablePillProps = {
+  label: string;
+  onDrop: (solution: string, x: number, y: number) => void;
+};
+
+function DraggablePill({ label, onDrop }: DraggablePillProps) {
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+
+  const gestureHandler = useAnimatedGestureHandler({
+    onActive: (event) => {
+      translateX.value = event.translationX;
+      translateY.value = event.translationY;
+    },
+    onEnd: (event) => {
+      runOnJS(onDrop)(label, event.absoluteX, event.absoluteY);
+      translateX.value = withSpring(0);
+      translateY.value = withSpring(0);
+    },
+  });
+
+  const style = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: translateX.value },
+      { translateY: translateY.value },
+    ],
+  }));
+
+  return (
+    <PanGestureHandler onGestureEvent={gestureHandler}>
+      <Animated.View style={[styles.draggable, style]}>
+        <Text style={styles.dragText}>{label}</Text>
+      </Animated.View>
+    </PanGestureHandler>
+  );
+}
+
 export default function InfoTechGame() {
   const [started, setStarted] = useState(false);
   const [completed, setCompleted] = useState(false);
@@ -37,56 +75,27 @@ export default function InfoTechGame() {
   const [matches, setMatches] = useState<Record<string, string>>({});
   const [dropZones, setDropZones] = useState<Record<string, LayoutRectangle>>({});
 
-  const onDrop = (solution: string, gestureX: number, gestureY: number) => {
+  const onDrop = (solution: string, x: number, y: number) => {
     for (const p of problems) {
       const zone = dropZones[p.id];
       if (
         zone &&
-        gestureX > zone.x &&
-        gestureX < zone.x + zone.width &&
-        gestureY > zone.y &&
-        gestureY < zone.y + zone.height
+        x > zone.x &&
+        x < zone.x + zone.width &&
+        y > zone.y &&
+        y < zone.y + zone.height
       ) {
-        setMatches(prev => ({ ...prev, [p.id]: solution }));
+        const updatedMatches = { ...matches, [p.id]: solution };
+        setMatches(updatedMatches);
 
-        const correct = problems.filter(pr => prev[pr.id] === pr.solution || (pr.id === p.id && solution === pr.solution)).length;
+        const correct = problems.filter(
+          prob => updatedMatches[prob.id] === prob.solution
+        ).length;
         const newScore = (correct / problems.length) * 100;
         setScore(newScore);
         return;
       }
     }
-  };
-
-  const renderDraggable = (text: string, index: number) => {
-    const translateX = useSharedValue(0);
-    const translateY = useSharedValue(0);
-
-    const gestureHandler = useAnimatedGestureHandler({
-      onActive: (event) => {
-        translateX.value = event.translationX;
-        translateY.value = event.translationY;
-      },
-      onEnd: (event) => {
-        runOnJS(onDrop)(text, event.absoluteX, event.absoluteY);
-        translateX.value = withSpring(0);
-        translateY.value = withSpring(0);
-      },
-    });
-
-    const style = useAnimatedStyle(() => ({
-      transform: [
-        { translateX: translateX.value },
-        { translateY: translateY.value },
-      ],
-    }));
-
-    return (
-      <PanGestureHandler key={index} onGestureEvent={gestureHandler}>
-        <Animated.View style={[styles.draggable, style]}>
-          <Text style={styles.dragText}>{text}</Text>
-        </Animated.View>
-      </PanGestureHandler>
-    );
   };
 
   const handleSubmit = () => {
@@ -101,7 +110,7 @@ export default function InfoTechGame() {
   if (!started) {
     return (
       <View style={styles.startScreen}>
-       
+      
         <Text style={styles.title}>Troubleshoot IT - Level 1</Text>
         <Pressable style={styles.startButton} onPress={() => setStarted(true)}>
           <Text style={styles.buttonText}>Start Game</Text>
@@ -111,7 +120,7 @@ export default function InfoTechGame() {
   }
 
   return (
-    <View style={styles.gameScreen}>
+    <GestureHandlerRootView style={styles.gameScreen}>
       <Text style={styles.subtitle}>Drag solutions to the correct problems</Text>
 
       <View>
@@ -119,7 +128,7 @@ export default function InfoTechGame() {
           <View
             key={p.id}
             onLayout={e => {
-              const { layout } = e.nativeEvent;
+              const layout = e.nativeEvent.layout;
               setDropZones(prev => ({ ...prev, [p.id]: layout }));
             }}
             style={styles.problemCard}
@@ -135,7 +144,9 @@ export default function InfoTechGame() {
       </View>
 
       <View style={styles.draggables}>
-        {solutions.map((sol, i) => renderDraggable(sol, i))}
+        {solutions.map((sol, i) => (
+          <DraggablePill key={i} label={sol} onDrop={onDrop} />
+        ))}
       </View>
 
       <Pressable style={styles.submitButton} onPress={handleSubmit}>
@@ -147,7 +158,7 @@ export default function InfoTechGame() {
           {score >= 70 ? ` Passed with ${Math.round(score)}%` : ` Failed with ${Math.round(score)}%`}
         </Text>
       )}
-    </View>
+    </GestureHandlerRootView>
   );
 }
 
