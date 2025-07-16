@@ -1,7 +1,4 @@
-const crypto = require('crypto');                   
-const mysql = require('mysql2');
-const cors = require('cors');
-const express = require('express');
+const crypto = require('crypto');
 
 const algorithm = 'aes=256-cbc';
 
@@ -95,7 +92,7 @@ async function sendPacket(serviceToRequest, data) {
     numbers related to degree percents(can be up to 3 degrees for )
 }
 */
-async function registerrequest(setOfData){
+async function registerRequest(setOfData){
     var iteration = 0;
     const {
         email,
@@ -110,6 +107,9 @@ async function registerrequest(setOfData){
         selectedDegreeNo,
         degreePercentString
     } = null;
+    selectedDegreeNo = 0;
+    firstname = 'John';
+    lastName = 'Doe';
     setOfData.forEach(dataItem => {
         switch (iteration) {
             case 0:
