@@ -8,11 +8,17 @@ import {
   Pressable,
   Image,
   Alert,
+  LayoutRectangle,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import Draggable from 'react-native-draggable';
+import { PanGestureHandler, GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated, {
+  useSharedValue,
+  useAnimatedGestureHandler,
+  useAnimatedStyle,
+  withSpring,
+  runOnJS,
+} from 'react-native-reanimated';
 
 const problems = [
   { id: '1', problem: 'Wi-Fi not working', solution: 'Restart router' },
@@ -20,82 +26,125 @@ const problems = [
   { id: '3', problem: 'No sound', solution: 'Check speakers' },
 ];
 
+const solutions = [
+  'Restart router',
+  'Clear cache',
+  'Check speakers',
+];
+
+type DraggablePillProps = {
+  label: string;
+  onDrop: (solution: string, x: number, y: number) => void;
+};
+
+function DraggablePill({ label, onDrop }: DraggablePillProps) {
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+
+  const gestureHandler = useAnimatedGestureHandler({
+    onActive: (event) => {
+      translateX.value = event.translationX;
+      translateY.value = event.translationY;
+    },
+    onEnd: (event) => {
+      runOnJS(onDrop)(label, event.absoluteX, event.absoluteY);
+      translateX.value = withSpring(0);
+      translateY.value = withSpring(0);
+    },
+  });
+
+  const style = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: translateX.value },
+      { translateY: translateY.value },
+    ],
+  }));
+
+  return (
+    <PanGestureHandler onGestureEvent={gestureHandler}>
+      <Animated.View style={[styles.draggable, style]}>
+        <Text style={styles.dragText}>{label}</Text>
+      </Animated.View>
+    </PanGestureHandler>
+  );
+}
+
 export default function InfoTechGame() {
   const router = useRouter();
   const [started, setStarted] = useState(false);
-  const [matches, setMatches] = useState<Record<string, string>>({});
-  const [score, setScore] = useState(0);
   const [completed, setCompleted] = useState(false);
-  const [showResultScreen, setShowResultScreen] = useState(false);
+  const [score, setScore] = useState(0);
+  const [matches, setMatches] = useState<Record<string, string>>({});
+  const [dropZones, setDropZones] = useState<Record<string, LayoutRectangle>>({});
 
-  const startGame = () => {
-    setStarted(true);
-    setMatches({});
-    setScore(0);
-    setCompleted(false);
-    setShowResultScreen(false);
+  const onDrop = (solution: string, x: number, y: number) => {
+    for (const p of problems) {
+      const zone = dropZones[p.id];
+      if (
+        zone &&
+        x > zone.x &&
+        x < zone.x + zone.width &&
+        y > zone.y &&
+        y < zone.y + zone.height
+      ) {
+        const updatedMatches = { ...matches, [p.id]: solution };
+        setMatches(updatedMatches);
+
+        const correct = problems.filter(
+          prob => updatedMatches[prob.id] === prob.solution
+        ).length;
+        const newScore = (correct / problems.length) * 100;
+        setScore(newScore);
+        return;
+      }
+    }
   };
 
-  const handleDrop = (problemId: string, solution: string) => {
-    setMatches((prev) => ({ ...prev, [problemId]: solution }));
-  };
-
-  const submitGame = () => {
-    const correctCount = problems.filter(
-      (p) => matches[p.id] === p.solution
-    ).length;
-    const newScore = (correctCount / problems.length) * 100;
-    setScore(newScore);
+  const handleSubmit = () => {
     setCompleted(true);
-    setShowResultScreen(true);
   };
 
-  const tryAgain = () => {
+  const restart = () => {
+    setCompleted(false);
     setStarted(false);
     setMatches({});
     setScore(0);
-    setCompleted(false);
-    setShowResultScreen(false);
   };
 
   if (!started) {
     return (
-      <View style={styles.startContainer}>
-        <Animated.View entering={FadeIn}>
-          <Image source={require('@/assets/images/it-start.png')} style={styles.image} />
-          <Text style={styles.title}>Troubleshoot IT - Level 1</Text>
-          <Pressable style={styles.startButton} onPress={startGame}>
-            <Text style={styles.buttonText}>Start</Text>
-          </Pressable>
-        </Animated.View>
+      <View style={styles.startScreen}>
+        <Image source={require('@/assets/images/it-start.png')} style={styles.image} />
+        <Text style={styles.title}>Troubleshoot IT - Level 1</Text>
+        <Pressable style={styles.startButton} onPress={() => setStarted(true)}>
+          <Text style={styles.buttonText}>Start Game</Text>
+        </Pressable>
       </View>
     );
   }
 
-  if (showResultScreen) {
+  if (completed) {
+    const passed = score >= 70;
     return (
-      <View style={styles.resultContainer}>
+      <View style={styles.resultScreen}>
         <Text style={styles.resultText}>
-          {score >= 70 ? ' Success!' : ' You Failed'}
+          {passed
+            ? ` Success! You scored ${Math.round(score)}%`
+            : ` Failed! You scored ${Math.round(score)}%`}
         </Text>
-        <Text style={styles.resultScore}>Your Score: {Math.round(score)}%</Text>
-
-        {score >= 70 ? (
+        {passed ? (
           <Pressable
-            style={styles.resultButton}
-            onPress={() => Alert.alert('Next Level', 'Level 2 coming soon!')}
+            style={styles.nextButton}
+            onPress={() => Alert.alert("Coming Soon", "Level 2 will be unlocked!")}
           >
             <Text style={styles.buttonText}>Play Level 2</Text>
           </Pressable>
         ) : (
           <>
-            <Pressable style={styles.resultButton} onPress={tryAgain}>
+            <Pressable style={styles.retryButton} onPress={restart}>
               <Text style={styles.buttonText}>Try Again</Text>
             </Pressable>
-            <Pressable
-              style={styles.resultButton}
-              onPress={() => router.push('/')}
-            >
+            <Pressable style={styles.homeButton} onPress={() => router.push('/')}>
               <Text style={styles.buttonText}>Go Home</Text>
             </Pressable>
           </>
@@ -105,39 +154,36 @@ export default function InfoTechGame() {
   }
 
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <Text style={styles.title}>Match Problems to Solutions</Text>
+    <GestureHandlerRootView style={styles.gameScreen}>
+      <Text style={styles.subtitle}>Drag solutions to the correct problems</Text>
 
-      {problems.map((problem) => (
-        <View key={problem.id} style={styles.card}>
-          <Text style={styles.problemText}>{problem.problem}</Text>
-          <Text style={styles.dropZone}>
-            {matches[problem.id] ?? 'Drop solution here'}
-          </Text>
-        </View>
-      ))}
-
-      <View style={styles.draggables}>
-        {problems.map((item) => (
-          <Draggable
-            key={item.solution}
-            x={50}
-            y={0}
-            renderColor="#ffffff"
-            renderText={item.solution}
-            onDragRelease={(e, gestureState) => {
-              const randomProblem = problems.find(
-                (p) => !matches[p.id] && p.solution === item.solution
-              );
-              if (randomProblem) {
-                handleDrop(randomProblem.id, item.solution);
-              }
+      <View>
+        {problems.map(p => (
+          <View
+            key={p.id}
+            onLayout={e => {
+              const layout = e.nativeEvent.layout;
+              setDropZones(prev => ({ ...prev, [p.id]: layout }));
             }}
-          />
+            style={styles.problemCard}
+          >
+            <Text style={styles.problemText}>{p.problem}</Text>
+            <View style={styles.dropZone}>
+              <Text style={{ color: '#888' }}>
+                {matches[p.id] || 'Drop Solution Here'}
+              </Text>
+            </View>
+          </View>
         ))}
       </View>
 
-      <Pressable style={styles.submitButton} onPress={submitGame}>
+      <View style={styles.draggables}>
+        {solutions.map((sol, i) => (
+          <DraggablePill key={i} label={sol} onDrop={onDrop} />
+        ))}
+      </View>
+
+      <Pressable style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Submit</Text>
       </Pressable>
     </GestureHandlerRootView>
@@ -145,94 +191,121 @@ export default function InfoTechGame() {
 }
 
 const styles = StyleSheet.create({
-  startContainer: {
+  startScreen: {
     flex: 1,
-    backgroundColor: '#6a1b9a',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#9f7aea',
+    padding: 20,
+  },
+  gameScreen: {
+    flex: 1,
+    backgroundColor: '#f3e8ff',
+    padding: 20,
+  },
+  resultScreen: {
+    flex: 1,
+    backgroundColor: '#ede9fe',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-  },
-  resultContainer: {
-    flex: 1,
-    backgroundColor: '#6a1b9a',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#6a1b9a',
-    padding: 20,
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 24,
-    color: 'white',
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
   },
   image: {
-    width: 280,
+    width: 200,
     height: 200,
     resizeMode: 'contain',
     marginBottom: 30,
   },
-  startButton: {
-    backgroundColor: '#9c27b0',
-    padding: 16,
-    borderRadius: 12,
-    marginTop: 20,
+  title: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 20,
   },
-  submitButton: {
-    backgroundColor: '#ffffff',
+  subtitle: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginBottom: 20,
+    fontWeight: '600',
+    color: '#4c1d95',
+  },
+  startButton: {
+    backgroundColor: '#6b21a8',
     padding: 15,
     borderRadius: 10,
-    marginTop: 40,
-    alignItems: 'center',
   },
-  resultButton: {
-    backgroundColor: '#ffffff',
+  submitButton: {
+    backgroundColor: '#6d28d9',
+    padding: 14,
+    borderRadius: 10,
+    marginTop: 30,
+    alignSelf: 'center',
+  },
+  nextButton: {
+    backgroundColor: '#4ade80',
+    padding: 14,
+    borderRadius: 10,
+    marginTop: 30,
+  },
+  retryButton: {
+    backgroundColor: '#f87171',
     padding: 14,
     borderRadius: 10,
     marginTop: 20,
   },
-  buttonText: {
-    color: '#6a1b9a',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  card: {
-    backgroundColor: '#e1bee7',
-    padding: 16,
+  homeButton: {
+    backgroundColor: '#60a5fa',
+    padding: 14,
     borderRadius: 10,
-    marginBottom: 12,
+    marginTop: 10,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  resultText: {
+    fontSize: 20,
+    marginBottom: 20,
+    fontWeight: 'bold',
+  },
+  problemCard: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    marginBottom: 15,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   problemText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#4a148c',
+    marginBottom: 10,
   },
   dropZone: {
-    backgroundColor: '#fff',
-    marginTop: 10,
-    padding: 10,
+    borderWidth: 2,
+    borderColor: '#ddd',
+    padding: 12,
     borderRadius: 8,
-    textAlign: 'center',
-  },
-  draggables: {
-    marginTop: 30,
+    backgroundColor: '#fafafa',
     alignItems: 'center',
   },
-  resultText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 15,
+  draggables: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 30,
+    flexWrap: 'wrap',
   },
-  resultScore: {
-    fontSize: 20,
+  draggable: {
+    padding: 12,
+    backgroundColor: '#7c3aed',
+    borderRadius: 8,
+    margin: 10,
+  },
+  dragText: {
     color: 'white',
-    marginBottom: 20,
+    fontWeight: 'bold',
   },
 });
