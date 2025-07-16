@@ -15,6 +15,7 @@ async function handleServiceRequest(serviceData) {
             persona3,
             persona4,
             selectedDegreeNo,
+            degreeSetString,
             timekey
         } = payload;
         const postdata ={
@@ -28,7 +29,8 @@ async function handleServiceRequest(serviceData) {
             persona2,
             persona3,
             persona4,
-            selectedDegreeNo
+            selectedDegreeNo,
+            degreeSetString
         };
         try{
             const res = await axios.post('http://localhost:3306/register', postdata);
