@@ -88,15 +88,64 @@ const personalityData: Record<
   },
 };
 
+const normalizeMajor = (major: string) => major.trim().toLowerCase();
+
+const majorRouteMap = {
+  "computer science": "/games/compGame",
+  finance: "/games/financeGame",
+  accounting: "/games/accountingGame",
+  "criminal justice": "/games/criminalJusticeGame",
+  nursing: "/games/nursingGame",
+  "social work": "/games/socialWorkGame",
+  psychology: "/games/psychologyGame",
+  education: "/games/educationGame",
+  engineering: "/games/engineeringGame",
+  "data science": "/games/dataScienceGame",
+  "mechanical engineering": "/games/mechanicalEngineeringGame",
+  "information technology": "/games/infoTechGame",
+  "graphic design": "/games/graphicDesignGame",
+  "interior design": "/games/interiorDesignGame",
+  "creative writing": "/games/creativeWritingGame",
+  "human services": "/games/humanServicesGame",
+  philosophy: "/games/philosophyGame",
+  "business administration": "/games/businessAdminGame",
+  "sports management": "/games/sportsManagementGame",
+  "performing arts": "/games/performingArtsGame",
+  "hospitality management": "/games/hospitalityManagementGame",
+  marketing: "/games/marketingGame",
+  journalism: "/games/journalismGame",
+  entrepreneurship: "/games/entrepreneurshipGame",
+  "political science": "/games/politicalScienceGame",
+  management: "/games/managementGame",
+  "public administration": "/games/publicAdminGame",
+  counseling: "/games/counselingGame",
+  communications: "/games/communicationsGame",
+  law: "/games/lawGame",
+} as const;
+
+type MajorKeys = keyof typeof majorRouteMap;
+
 export default function ResultScreen() {
   const { type } = useLocalSearchParams();
   const router = useRouter();
+
   const result = typeof type === "string" ? type.toUpperCase() : "";
   const data = personalityData[result];
 
+  const handleMajorPress = (major: string) => {
+    const key = normalizeMajor(major);
+
+    if (key in majorRouteMap) {
+      const route = majorRouteMap[key as MajorKeys];
+      router.push(route as unknown as Parameters<typeof router.push>[0]);
+    } else {
+      alert(`No game screen found for major: ${major}`);
+    }
+  };
+
   return (
     <LinearGradient
-      colors={["#d0e6ff", "#e0c3fc", "#f8f9fa"]}
+      colors={["#d0e6ff", "#c3b9fc", "#f8f9fa"]}
       style={styles.container}
       start={{ x: 0.1, y: 0.1 }}
       end={{ x: 0.9, y: 0.9 }}
@@ -108,17 +157,19 @@ export default function ResultScreen() {
           <Text style={styles.subheading}>Suggested Majors:</Text>
           {data.majors.map((major, index) => (
             <Pressable
-              key={index}
-              style={styles.majorButton}
-              // onPress={() => router.push(`/game?major=${major}`)}
-              onPress={() => {
+  key={index}
+  style={styles.majorButton}
+  onPress={() => {
     if (result === "ESFP" && major === "Performing Arts") {
       router.push("/artsmajorgame");
+    } else if (result === "ESFP" && major === "Hospitality Management") {
+      router.push("/hospminigame");
     }
   }}
-            >
-              <Text style={styles.majorText}>{major}</Text>
-            </Pressable>
+>
+  <Text style={styles.majorText}>{major}</Text>
+</Pressable>
+
           ))}
         </>
       ) : (
