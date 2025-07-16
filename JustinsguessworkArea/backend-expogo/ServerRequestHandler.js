@@ -170,4 +170,9 @@ async function registerRequest(setOfData){
         degreeSetString,
         Date.now()        
     );
+
+}
+
+async function loginrequest() {
+    
 }

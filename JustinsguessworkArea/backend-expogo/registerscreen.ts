@@ -1,7 +1,7 @@
 // @ts-ignore
 import React, { useState } from 'react';
 // @ts-ignore
-import { View, TextInput, Stylesheet, Text, TouchableOpacity} from 'react-native'
+import { KeyboardAvoidingView, Platform, Scrollview, View, TextInput, Stylesheet, Text, TouchableOpacity} from 'react-native'
 // @ts-ignore
 import registerRequest from './newStudent.js'
 
@@ -115,22 +115,27 @@ export default function RegisterScreen() {
             degreePercent3,
             degreePercent4
         };
+        if (!email || !password || !studentID || !firstName || !lastName) {
+            alert('Please fill out all fields');
+            return;
+        }
         registerRequest(userdata);//send da packet
     };
-    const page = ()=> (
-        <View style ={styles.container}>
-            <TextInput style={styles.input} placeholder="email" onChangeText={setEmail} value = {email} keyboardType="email-address" />
-            <TextInput style={styles.input} placeholder="Password" onChangeText={setPassword} value={password} secureTextEntry />
-            <TextInput style={styles.input} placeholder="StudentID" onChangeText={setstudentID} value={studentID} />
-            <TextInput style={styles.input} placeholder="FirstName" onChangeText = {setFirstName} value={firstName} />
-            <TextInput style={styles.input} placeholder="LastName" onChangeText = {setLastName} value={lastName} />
+    return (
+        <KeyboardAvoidingView<KeyboardAvoidingView behavior={Platform,OS === 'ios' ? 'padding' : undefined} style={{ flex: 1}}>
+            <Scrollview contentContainerStyle={styles.contianer}>
+                <Text style={styles.title}>Register</text>
+                <TextInput style={styles.input} placeholder="email" onChangeText={setEmail} value = {email} keyboardType="email-address" />
+                <TextInput style={styles.input} placeholder="Password" onChangeText={setPassword} value={password} secureTextEntry />
+                <TextInput style={styles.input} placeholder="StudentID" onChangeText={setstudentID} value={studentID} />
+                <TextInput style={styles.input} placeholder="FirstName" onChangeText = {setFirstName} value={firstName} />
+                <TextInput style={styles.input} placeholder="LastName" onChangeText = {setLastName} value={lastName} />
 
-            <TouchableOpacity style={styles.button} onPress={handleRegister}>
-                <Text style={styles.buttonText}>Register</Text>
-            </TouchableOpacity>
-        </View>
+                <TouchableOpacity style={styles.button} onPress={handleRegister}>
+                    <Text style={styles.buttonText}>Register</Text>
+                </TouchableOpacity>
+        </KeyboardAvoidingView>
     )
-    return page;
 }
 
 
