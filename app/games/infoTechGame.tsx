@@ -6,7 +6,7 @@ import {
   Text,
   StyleSheet,
   Pressable,
-  Image,
+  ImageBackground,
   Alert,
   LayoutRectangle,
 } from 'react-native';
@@ -26,11 +26,7 @@ const problems = [
   { id: '3', problem: 'No sound', solution: 'Check speakers' },
 ];
 
-const solutions = [
-  'Restart router',
-  'Clear cache',
-  'Check speakers',
-];
+const solutions = ['Restart router', 'Clear cache', 'Check speakers'];
 
 type DraggablePillProps = {
   label: string;
@@ -54,10 +50,7 @@ function DraggablePill({ label, onDrop }: DraggablePillProps) {
   });
 
   const style = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-    ],
+    transform: [{ translateX: translateX.value }, { translateY: translateY.value }],
   }));
 
   return (
@@ -91,7 +84,7 @@ export default function InfoTechGame() {
         setMatches(updatedMatches);
 
         const correct = problems.filter(
-          prob => updatedMatches[prob.id] === prob.solution
+          (prob) => updatedMatches[prob.id] === prob.solution
         ).length;
         const newScore = (correct / problems.length) * 100;
         setScore(newScore);
@@ -113,13 +106,18 @@ export default function InfoTechGame() {
 
   if (!started) {
     return (
-      <View style={styles.startScreen}>
-        <Image source={require('@/assets/images/it-start.png')} style={styles.image} />
-        <Text style={styles.title}>Troubleshoot IT - Level 1</Text>
-        <Pressable style={styles.startButton} onPress={() => setStarted(true)}>
-          <Text style={styles.buttonText}>Start Game</Text>
-        </Pressable>
-      </View>
+      <ImageBackground
+        source={require('@/assets/images/it-start.png')}
+        style={styles.fullscreenImage}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay}>
+          <Text style={styles.title}>Troubleshoot IT - Level 1</Text>
+          <Pressable style={styles.startButton} onPress={() => setStarted(true)}>
+            <Text style={styles.buttonText}>Start Game</Text>
+          </Pressable>
+        </View>
+      </ImageBackground>
     );
   }
 
@@ -135,7 +133,7 @@ export default function InfoTechGame() {
         {passed ? (
           <Pressable
             style={styles.nextButton}
-            onPress={() => Alert.alert("Coming Soon", "Level 2 will be unlocked!")}
+            onPress={() => Alert.alert('Coming Soon', 'Level 2 will be unlocked!')}
           >
             <Text style={styles.buttonText}>Play Level 2</Text>
           </Pressable>
@@ -158,12 +156,12 @@ export default function InfoTechGame() {
       <Text style={styles.subtitle}>Drag solutions to the correct problems</Text>
 
       <View>
-        {problems.map(p => (
+        {problems.map((p) => (
           <View
             key={p.id}
-            onLayout={e => {
+            onLayout={(e) => {
               const layout = e.nativeEvent.layout;
-              setDropZones(prev => ({ ...prev, [p.id]: layout }));
+              setDropZones((prev) => ({ ...prev, [p.id]: layout }));
             }}
             style={styles.problemCard}
           >
@@ -191,12 +189,16 @@ export default function InfoTechGame() {
 }
 
 const styles = StyleSheet.create({
-  startScreen: {
+  fullscreenImage: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#9f7aea',
+  },
+  overlay: {
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     padding: 20,
+    borderRadius: 15,
+    alignItems: 'center',
   },
   gameScreen: {
     flex: 1,
@@ -210,17 +212,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
-  image: {
-    width: 200,
-    height: 200,
-    resizeMode: 'contain',
-    marginBottom: 30,
-  },
   title: {
     fontSize: 26,
     fontWeight: 'bold',
     color: 'white',
     marginBottom: 20,
+  },
+  startButton: {
+    backgroundColor: '#6b21a8',
+    padding: 15,
+    borderRadius: 10,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
   subtitle: {
     fontSize: 18,
@@ -228,46 +233,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     fontWeight: '600',
     color: '#4c1d95',
-  },
-  startButton: {
-    backgroundColor: '#6b21a8',
-    padding: 15,
-    borderRadius: 10,
-  },
-  submitButton: {
-    backgroundColor: '#6d28d9',
-    padding: 14,
-    borderRadius: 10,
-    marginTop: 30,
-    alignSelf: 'center',
-  },
-  nextButton: {
-    backgroundColor: '#4ade80',
-    padding: 14,
-    borderRadius: 10,
-    marginTop: 30,
-  },
-  retryButton: {
-    backgroundColor: '#f87171',
-    padding: 14,
-    borderRadius: 10,
-    marginTop: 20,
-  },
-  homeButton: {
-    backgroundColor: '#60a5fa',
-    padding: 14,
-    borderRadius: 10,
-    marginTop: 10,
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  resultText: {
-    fontSize: 20,
-    marginBottom: 20,
-    fontWeight: 'bold',
   },
   problemCard: {
     backgroundColor: '#fff',
@@ -306,6 +271,36 @@ const styles = StyleSheet.create({
   },
   dragText: {
     color: 'white',
+    fontWeight: 'bold',
+  },
+  submitButton: {
+    backgroundColor: '#6d28d9',
+    padding: 14,
+    borderRadius: 10,
+    marginTop: 30,
+    alignSelf: 'center',
+  },
+  nextButton: {
+    backgroundColor: '#4ade80',
+    padding: 14,
+    borderRadius: 10,
+    marginTop: 30,
+  },
+  retryButton: {
+    backgroundColor: '#f87171',
+    padding: 14,
+    borderRadius: 10,
+    marginTop: 20,
+  },
+  homeButton: {
+    backgroundColor: '#60a5fa',
+    padding: 14,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  resultText: {
+    fontSize: 20,
+    marginBottom: 20,
     fontWeight: 'bold',
   },
 });
