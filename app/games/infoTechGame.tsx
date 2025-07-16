@@ -6,18 +6,13 @@ import {
   Text,
   StyleSheet,
   Pressable,
- // Image,
+  Image,
   Alert,
-  LayoutRectangle,
 } from 'react-native';
-import { PanGestureHandler, GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, {
-  useSharedValue,
-  useAnimatedGestureHandler,
-  useAnimatedStyle,
-  withSpring,
-  runOnJS,
-} from 'react-native-reanimated';
+import { useRouter } from 'expo-router';
+import Animated, { FadeIn } from 'react-native-reanimated';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Draggable from 'react-native-draggable';
 
 const problems = [
   { id: '1', problem: 'Wi-Fi not working', solution: 'Restart router' },
@@ -25,235 +20,219 @@ const problems = [
   { id: '3', problem: 'No sound', solution: 'Check speakers' },
 ];
 
-const solutions = [
-  'Restart router',
-  'Clear cache',
-  'Check speakers',
-];
-
-type DraggablePillProps = {
-  label: string;
-  onDrop: (solution: string, x: number, y: number) => void;
-};
-
-function DraggablePill({ label, onDrop }: DraggablePillProps) {
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
-
-  const gestureHandler = useAnimatedGestureHandler({
-    onActive: (event) => {
-      translateX.value = event.translationX;
-      translateY.value = event.translationY;
-    },
-    onEnd: (event) => {
-      runOnJS(onDrop)(label, event.absoluteX, event.absoluteY);
-      translateX.value = withSpring(0);
-      translateY.value = withSpring(0);
-    },
-  });
-
-  const style = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-    ],
-  }));
-
-  return (
-    <PanGestureHandler onGestureEvent={gestureHandler}>
-      <Animated.View style={[styles.draggable, style]}>
-        <Text style={styles.dragText}>{label}</Text>
-      </Animated.View>
-    </PanGestureHandler>
-  );
-}
-
 export default function InfoTechGame() {
+  const router = useRouter();
   const [started, setStarted] = useState(false);
-  const [completed, setCompleted] = useState(false);
-  const [score, setScore] = useState(0);
   const [matches, setMatches] = useState<Record<string, string>>({});
-  const [dropZones, setDropZones] = useState<Record<string, LayoutRectangle>>({});
+  const [score, setScore] = useState(0);
+  const [completed, setCompleted] = useState(false);
+  const [showResultScreen, setShowResultScreen] = useState(false);
 
-  const onDrop = (solution: string, x: number, y: number) => {
-    for (const p of problems) {
-      const zone = dropZones[p.id];
-      if (
-        zone &&
-        x > zone.x &&
-        x < zone.x + zone.width &&
-        y > zone.y &&
-        y < zone.y + zone.height
-      ) {
-        const updatedMatches = { ...matches, [p.id]: solution };
-        setMatches(updatedMatches);
-
-        const correct = problems.filter(
-          prob => updatedMatches[prob.id] === prob.solution
-        ).length;
-        const newScore = (correct / problems.length) * 100;
-        setScore(newScore);
-        return;
-      }
-    }
+  const startGame = () => {
+    setStarted(true);
+    setMatches({});
+    setScore(0);
+    setCompleted(false);
+    setShowResultScreen(false);
   };
 
-  const handleSubmit = () => {
+  const handleDrop = (problemId: string, solution: string) => {
+    setMatches((prev) => ({ ...prev, [problemId]: solution }));
+  };
+
+  const submitGame = () => {
+    const correctCount = problems.filter(
+      (p) => matches[p.id] === p.solution
+    ).length;
+    const newScore = (correctCount / problems.length) * 100;
+    setScore(newScore);
     setCompleted(true);
-    const passed = score >= 70;
-    Alert.alert(
-      passed ? ' Level Complete' : ' Try Again',
-      `You scored ${Math.round(score)}%`
-    );
+    setShowResultScreen(true);
+  };
+
+  const tryAgain = () => {
+    setStarted(false);
+    setMatches({});
+    setScore(0);
+    setCompleted(false);
+    setShowResultScreen(false);
   };
 
   if (!started) {
     return (
-      <View style={styles.startScreen}>
-      
-        <Text style={styles.title}>Troubleshoot IT - Level 1</Text>
-        <Pressable style={styles.startButton} onPress={() => setStarted(true)}>
-          <Text style={styles.buttonText}>Start Game</Text>
-        </Pressable>
+      <View style={styles.startContainer}>
+        <Animated.View entering={FadeIn}>
+          <Image source={require('@/assets/images/it-start.png')} style={styles.image} />
+          <Text style={styles.title}>Troubleshoot IT - Level 1</Text>
+          <Pressable style={styles.startButton} onPress={startGame}>
+            <Text style={styles.buttonText}>Start</Text>
+          </Pressable>
+        </Animated.View>
+      </View>
+    );
+  }
+
+  if (showResultScreen) {
+    return (
+      <View style={styles.resultContainer}>
+        <Text style={styles.resultText}>
+          {score >= 70 ? ' Success!' : ' You Failed'}
+        </Text>
+        <Text style={styles.resultScore}>Your Score: {Math.round(score)}%</Text>
+
+        {score >= 70 ? (
+          <Pressable
+            style={styles.resultButton}
+            onPress={() => Alert.alert('Next Level', 'Level 2 coming soon!')}
+          >
+            <Text style={styles.buttonText}>Play Level 2</Text>
+          </Pressable>
+        ) : (
+          <>
+            <Pressable style={styles.resultButton} onPress={tryAgain}>
+              <Text style={styles.buttonText}>Try Again</Text>
+            </Pressable>
+            <Pressable
+              style={styles.resultButton}
+              onPress={() => router.push('/')}
+            >
+              <Text style={styles.buttonText}>Go Home</Text>
+            </Pressable>
+          </>
+        )}
       </View>
     );
   }
 
   return (
-    <GestureHandlerRootView style={styles.gameScreen}>
-      <Text style={styles.subtitle}>Drag solutions to the correct problems</Text>
+    <GestureHandlerRootView style={styles.container}>
+      <Text style={styles.title}>Match Problems to Solutions</Text>
 
-      <View>
-        {problems.map(p => (
-          <View
-            key={p.id}
-            onLayout={e => {
-              const layout = e.nativeEvent.layout;
-              setDropZones(prev => ({ ...prev, [p.id]: layout }));
-            }}
-            style={styles.problemCard}
-          >
-            <Text style={styles.problemText}>{p.problem}</Text>
-            <View style={styles.dropZone}>
-              <Text style={{ color: '#888' }}>
-                {matches[p.id] || 'Drop Solution Here'}
-              </Text>
-            </View>
-          </View>
-        ))}
-      </View>
+      {problems.map((problem) => (
+        <View key={problem.id} style={styles.card}>
+          <Text style={styles.problemText}>{problem.problem}</Text>
+          <Text style={styles.dropZone}>
+            {matches[problem.id] ?? 'Drop solution here'}
+          </Text>
+        </View>
+      ))}
 
       <View style={styles.draggables}>
-        {solutions.map((sol, i) => (
-          <DraggablePill key={i} label={sol} onDrop={onDrop} />
+        {problems.map((item) => (
+          <Draggable
+            key={item.solution}
+            x={50}
+            y={0}
+            renderColor="#ffffff"
+            renderText={item.solution}
+            onDragRelease={(e, gestureState) => {
+              const randomProblem = problems.find(
+                (p) => !matches[p.id] && p.solution === item.solution
+              );
+              if (randomProblem) {
+                handleDrop(randomProblem.id, item.solution);
+              }
+            }}
+          />
         ))}
       </View>
 
-      <Pressable style={styles.submitButton} onPress={handleSubmit}>
+      <Pressable style={styles.submitButton} onPress={submitGame}>
         <Text style={styles.buttonText}>Submit</Text>
       </Pressable>
-
-      {completed && (
-        <Text style={[styles.resultText, score >= 70 ? styles.pass : styles.fail]}>
-          {score >= 70 ? ` Passed with ${Math.round(score)}%` : ` Failed with ${Math.round(score)}%`}
-        </Text>
-      )}
     </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
-  startScreen: {
+  startContainer: {
     flex: 1,
+    backgroundColor: '#6a1b9a',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#9f7aea',
     padding: 20,
   },
-  gameScreen: {
+  resultContainer: {
     flex: 1,
-    backgroundColor: '#f3e8ff',
+    backgroundColor: '#6a1b9a',
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
   },
-  
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 20,
+  container: {
+    flex: 1,
+    backgroundColor: '#6a1b9a',
+    padding: 20,
+    justifyContent: 'center',
   },
-  subtitle: {
-    fontSize: 18,
-    textAlign: 'center',
+  title: {
+    fontSize: 24,
+    color: 'white',
+    fontWeight: 'bold',
     marginBottom: 20,
-    fontWeight: '600',
-    color: '#4c1d95',
+    textAlign: 'center',
+  },
+  image: {
+    width: 280,
+    height: 200,
+    resizeMode: 'contain',
+    marginBottom: 30,
   },
   startButton: {
-    backgroundColor: '#6b21a8',
+    backgroundColor: '#9c27b0',
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 20,
+  },
+  submitButton: {
+    backgroundColor: '#ffffff',
     padding: 15,
     borderRadius: 10,
+    marginTop: 40,
+    alignItems: 'center',
+  },
+  resultButton: {
+    backgroundColor: '#ffffff',
+    padding: 14,
+    borderRadius: 10,
+    marginTop: 20,
   },
   buttonText: {
-    color: 'white',
+    color: '#6a1b9a',
     fontWeight: 'bold',
+    fontSize: 16,
   },
-  problemCard: {
-    backgroundColor: '#fff',
+  card: {
+    backgroundColor: '#e1bee7',
+    padding: 16,
     borderRadius: 10,
-    marginBottom: 15,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    marginBottom: 12,
   },
   problemText: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 10,
+    color: '#4a148c',
   },
   dropZone: {
-    borderWidth: 2,
-    borderColor: '#ddd',
-    padding: 12,
+    backgroundColor: '#fff',
+    marginTop: 10,
+    padding: 10,
     borderRadius: 8,
-    backgroundColor: '#fafafa',
-    alignItems: 'center',
+    textAlign: 'center',
   },
   draggables: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
     marginTop: 30,
-    flexWrap: 'wrap',
-  },
-  draggable: {
-    padding: 12,
-    backgroundColor: '#7c3aed',
-    borderRadius: 8,
-    margin: 10,
-  },
-  dragText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  submitButton: {
-    backgroundColor: '#6d28d9',
-    padding: 14,
-    borderRadius: 10,
-    marginTop: 30,
-    alignSelf: 'center',
+    alignItems: 'center',
   },
   resultText: {
-    marginTop: 25,
-    fontSize: 18,
-    textAlign: 'center',
+    fontSize: 28,
     fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 15,
   },
-  pass: {
-    color: 'green',
-  },
-  fail: {
-    color: 'red',
+  resultScore: {
+    fontSize: 20,
+    color: 'white',
+    marginBottom: 20,
   },
 });
