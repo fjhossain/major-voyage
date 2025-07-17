@@ -40,7 +40,22 @@ function encryptData(data, timestamp) {
     };
 }
 
-function sendEncryptedError(res, timestamp, message){
+function sendEncryptedError(res, timestamp, message, reason){
+    reasonStr = "";
+    switch (reason) {
+        case 0:
+            reasonStr = "no user";
+            break;
+        case 1:
+            reasonStr = "wrong pass";
+            break;
+        case 2:
+            reasonStr = "decryption/encryption failure";
+            break;  
+        default:
+            reasonStr = "no";
+            break;
+    }
     const response = {
         status: 'error',
         message,
@@ -54,10 +69,23 @@ function sendEncryptedError(res, timestamp, message){
         success: false,
         timestamp,
         iv: encrypted.iv,
-        content:encrypted.content
+        content:encrypted.content,
+        reason: reasonStr
     });
 }
-
+/*
+STUDENT_NO, 
+STUDENT_ID, 
+STUDENT_FNAME, 
+STUDENT_LNAME, 
+PASSWORD_ENCRYPT, 
+PERSONA_TEST_1, 
+PERSONA_TEST_2, 
+PERSONA_TEST_3, 
+PERSONA_TEST_4, 
+STUDENT_CREATION_TIME, 
+SELECTED_DEGREE_NO, 
+DEGREE_LINK_NO*/
 app.post('login', (req, res) => {
     const{userEmail, encryptedField, timekey} = req.body;
     const now = Date.now();
@@ -84,7 +112,8 @@ app.post('login', (req, res) => {
                     now, 
                     crypto.createHash('sha256').update(
                         email + 'INSERT INTO TABLE f'
-                    ).digest()
+                    ).digest(),
+                    0
                 )
             }
 
@@ -92,7 +121,7 @@ app.post('login', (req, res) => {
 
             if (user.PASSWORD_ENCRYPT !== reEncryptedPassword) {
                 return sendEncryptedError(res, now, 
-                    'password does not match'
+                    'password does not match',1
                 )
             }
 
@@ -100,7 +129,7 @@ app.post('login', (req, res) => {
                 status: 'success',
                 studentId: user.studentId,
                 firstName: user.STUDENT_FNAME,
-                lastname: user.STUDENT_FNAME,
+                lastname: user.STUDENT_LNAME,
                 personalityScores: [
                     user.PERSONA_TEST_1,
                     user.PERSONA_TEST_2,
@@ -108,13 +137,13 @@ app.post('login', (req, res) => {
                     user.PERSONA_TEST_4
                 ],
                 selectedDegree: user.SELECTED_DEGREE_NO,
+                degreeScores: user.DEGREE_LINK_NO,
                 timestamp: now
             };
 
             const encrypted = encryptData(
                 json.stringify(responsePayload), 
-                input.studentEmail.toString + 
-                "INSERT INTO FABLE f"
+                now
             );
             res.json({
                 success: true,
@@ -124,7 +153,12 @@ app.post('login', (req, res) => {
             });
         });
     } catch (error) {
-        sendEncryptedError(res, now, 'login decryption failed');
+        sendEncryptedError(
+            res, 
+            now, 
+            'login decryption failed', 
+            2
+        );
     }
 });
 

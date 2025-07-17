@@ -7,9 +7,8 @@ function deriveKey(secret) {
     return crypto.createHash('sha256').update(secret).digest();
 }
 
-function decryptData(encrypted, timekey) {
+function decryptData(encrypted, timekey, iv) {
     const key = deriveKey(timekey);
-    const iv = Buffer.from(encrypted.iv, 'hex');
     const decipher = crypto.createDecipheriv(algorithm, key, iv);
     let decrypted = decipher.update(encrypted.content, 'hex', 'utf8');
     decrypted += decipher.final('utf8')
@@ -173,6 +172,98 @@ async function registerRequest(setOfData){
 
 }
 
-async function loginrequest() {
-    
-}
+async function loginrequest(email, password) {
+    const timeKey = Date.now().toString();
+    const encryptedPassword = await encryptPass(password, timeKey);
+
+    const payload = {
+        service: 'login',
+        userEmail: email,
+        encryptedField: encryptedPassword,
+        iv:encryptedPassword.iv,
+        timeKey
+    };
+
+    try {
+        const sending = await fetch('/api/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'applictation/json'},
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (result.error) {
+            console.error("Login Failed: ", result.error);
+        } else {
+            const decryptData = await decryptData(encryptd, encryptData.content, encryptData.iv);
+            if(encryptData.status === false) {
+                const reasonStr = encryptData.reason;
+                if (reasonStr ==="no user") {
+                    return('Regsiter');
+                } else if (reasonStr === "wrong pass") {
+                    return('wrongPass');
+                } else if (reasonStr === "decryption/encryption failure") {
+                    return('resend')
+                } else {
+                    console.error('1=== weird logic error at login.js packet recieved: ', encryptData.content)
+                    console.error('1=== unencrypted: ', decryptData);
+                    console.error('1=== sent packet: ', payload.content);
+                    console.error('');
+
+                    return('resend');
+                }
+            } else { 
+                //everything is working, now to change the input into what is expected inputs login
+                /*const responsePayload = {
+                status: 'success',
+                studentId: user.studentId,
+                firstName: user.STUDENT_FNAME,
+                lastname: user.STUDENT_FNAME,
+                personalityScores: [
+                    user.PERSONA_TEST_1,
+                    user.PERSONA_TEST_2,
+                    user.PERSONA_TEST_3,
+                    user.PERSONA_TEST_4
+                ],
+                selectedDegree: user.SELECTED_DEGREE_NO,
+                degreeScores: user.DEGREE_LINK_NO,
+                timestamp: now
+            };*/
+            /*
+            studentId,
+            firstName,
+            lastName,
+            persona1,
+            persona2,
+            persona3,
+            persona4,
+            selectedDegreeNo,
+            degreePercentString*/
+            }
+            const new_studentId = decryptData.content.studentId;
+            const new_firstName = decryptData.content.firstName;
+            const new_lastName = decryptData.content.lastname;
+            const new_persona1 = decryptData.content.personalityScores[0];
+            const new_persona2 = decryptData.content.personalityScores[0];
+            const new_persona3 = decryptData.content.personalityScores[0];
+            const new_persona4 = decryptData.content.personalityScores[0];
+            const new_selectedDegreeNo = decryptData.content.selectedDegree;
+            const new_degreePercentString = decryptData.content.degreeScores;
+            
+            return {
+                studentId:new_studentId,
+                firstName:new_firstName,
+                lastName:new_lastName,
+                persona1:new_persona1,
+                persona2:new_persona2,
+                persona3:new_persona3,
+                persona4:new_persona4,
+                selectedDegreeNo:new_selectedDegreeNo,
+                degreePercentString:new_degreePercentString
+            };
+        }
+    } catch (error) {
+        console.error("error detected in ServerRequestHandler.js", error);
+    }
+
+} 

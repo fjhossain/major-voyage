@@ -91,7 +91,7 @@ app.post('/register', async (req, res) => {
             'STUDENT_EMAIL, PASSWORD_ENCRYPT, PERSONA_TEST_1, ' +
             'PERSONA_TEST_2, PERSONA_TEST_3, PERSONA_TEST_4, ' + 
             ' STUDENT_CREATION_TIME, SELECTED_DEGREE_NO,' +
-            'DegreeSetString) ' +
+            'DEGREE_LINK_NO) ' +
             'VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ' +
             '?, ?, ?, ?, ?);';
         const VALUES = [

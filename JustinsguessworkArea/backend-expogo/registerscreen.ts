@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 // @ts-ignore
 import { KeyboardAvoidingView, Platform, Scrollview, View, TextInput, Stylesheet, Text, TouchableOpacity} from 'react-native'
 // @ts-ignore
-import registerRequest from './newStudent.js'
+import registerRequest from './ServerRequestHandler.js/index.js'
 
 const styles = Stylesheet.create({
     container: {
