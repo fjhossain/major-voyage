@@ -116,7 +116,9 @@ export default function ResultScreen() {
                 onPress={() => {
                   if (major === "Business Administration") {
                     router.push("/game-business");
-                  } else {
+                  } else if (major === "Sports Management")  {
+                    router.push("/game-sports");
+                  } else{
                     alert(`Game for ${major} is coming soon!`);
                   }
                 }}
