@@ -6,7 +6,7 @@ import {
   Alert,
   StyleSheet,
   ScrollView,
-} from "react-native";
+} from "react-native"; 
 import { useRouter } from "expo-router";
 
 export default function GameBusiness() {
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   progress: {
-    fontSize: 16,
+    fontSize: 15,
     color: "#555",
     marginBottom: 12,
     textAlign: "center",
