@@ -267,5 +267,82 @@ async function loginrequest(email, password) {
     }
 } 
 async function update(setOfData) {
-    
+    var iteration = 0;
+    const {
+        email,
+        password,
+        studentId,
+        firstName,
+        lastName,
+        persona1,
+        persona2,
+        persona3,
+        persona4,
+        selectedDegreeNo,
+        degreePercentString
+    } = null;
+    selectedDegreeNo = 0;
+    firstname = 'John';
+    lastName = 'Doe';
+    setOfData.forEach(dataItem => {
+        switch (iteration) {
+            case 0:
+                email = dataItem;
+                break;
+            case 1:
+                password = dataItem;
+                break;
+            case 2:
+                studentId = dataItem;
+                break;
+            case 3:
+                firstName = dataItem;
+                break;
+            case 4:
+                lastName = dataItem;
+                break;
+            case 5:
+                persona1 = dataItem;
+                break;
+            case 6:
+                persona2 = dataItem;
+                break;
+            case 7:
+                persona3 = dataItem;
+                break;
+            case 8:
+                persona4 = dataItem;
+                break;
+            case 9:
+                selectedDegreeNo = dataItem;
+                break;
+            case 10:
+                degreePercentString += (dataItem.toString + " ");
+                break;
+            default:
+                break;
+            
+        }
+    });
+    const encryptedPass = encryptPass(
+        password, 
+        input.studentEmail.toString + 
+        "INSERT INTO LABLE f"
+    );
+    sendPacket(
+        'Update', 
+        studentId,
+        firstName,
+        lastName,
+        email,
+        encryptedPass,
+        persona1,
+        persona2,
+        persona3,
+        persona4,
+        selectedDegreeNo,
+        degreeSetString,
+        Date.now()        
+    );
+
 }
