@@ -265,5 +265,7 @@ async function loginrequest(email, password) {
     } catch (error) {
         console.error("error detected in ServerRequestHandler.js", error);
     }
-
 } 
+async function update(setOfData) {
+    
+}

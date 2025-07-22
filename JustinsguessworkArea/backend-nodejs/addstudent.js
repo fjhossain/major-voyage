@@ -108,8 +108,8 @@ app.post('/register', async (req, res) => {
             input.selectedDegreeNo,
             degreeSetString
         ];
-        db.query(query, VALUES, (err,result)=> {
-            if(err) {
+        db.query(query, VALUES, result) 
+            if(err|| result.length ===0 ) {
                 return sendEncryptedError(
                     res, input.studentEmail.toString + 
                     "INSERT INTO FABLE f", 
@@ -137,7 +137,6 @@ app.post('/register', async (req, res) => {
                 iv:encrypted.iv,
                 content: encrypted.content
             });
-        });
     }catch (error) {
         return sendEncryptedError(
             res,

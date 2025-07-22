@@ -1,8 +1,12 @@
-const express = require('express');
+const crypto = require('crypto');                   
 const mysql = require('mysql2');
-const crypto = require('crypto');
-const app = express();
+const cors = require('cors');
+const express = require('express');
 
+const app = express();
+const PORT = 3306;
+
+app.use(cors());
 app.use(express.json());
 
 const db = mysql.createConnection({
@@ -11,6 +15,14 @@ const db = mysql.createConnection({
     password: 'thiscsi4999(r@p',
     database: 'csi_4999projectset'
 });
+
+db.connect(err=> {
+    if (err) {
+        console.error('DB connection failed', err)
+        return;
+    }
+    console.log('MySQL connected!');
+})
 
 const algorithm = 'aes=256-cbc';
 
@@ -73,39 +85,39 @@ function sendEncryptedError(res, timestamp, message, reason){
         reason: reasonStr
     });
 }
-/*
-STUDENT_NO, 
-STUDENT_ID, 
-STUDENT_FNAME, 
-STUDENT_LNAME, 
-PASSWORD_ENCRYPT, 
-PERSONA_TEST_1, 
-PERSONA_TEST_2, 
-PERSONA_TEST_3, 
-PERSONA_TEST_4, 
-STUDENT_CREATION_TIME, 
-SELECTED_DEGREE_NO, 
-DEGREE_LINK_NO*/
-app.post('/login', (req, res) => {
-    const{userEmail, encryptedField, timekey} = req.body;
+app.post('/update', async (req, res) => {
+    const input = req.body;
     const now = Date.now();
-    
-    try {
+    const {
+            password,
+            timekey,
+            studentId,
+            firstName,
+            lastName,
+            email,
+            persona1,
+            persona2,
+            persona3,
+            persona4,
+            selectedDegreeNo,
+            degreeSetString
+        }= input
+   try {
         const decryptedPassword = decryptData(encryptedField,timeKey);
         const encrypted = encryptData(
             decryptedPassword, 
             crypto.createHash(
-                'sha256'
+               'sha256'
             ).update(
-                email + 
-                'Insert into table f'
+               email + 
+               'Insert into table f'
             ).digest());
         const reEncryptedPassword = encrypted.content;
-
+   
         const query = 'SELECT * FROM students '+
         'WHERE STUDENT_EMAIL = ?';
-
-        db.query(query, userEmail,  results)
+   
+        db.query(query, userEmail, results)
         if (err || results.length === 0) {
             return sendEncryptedError(
                 res, 
@@ -116,52 +128,82 @@ app.post('/login', (req, res) => {
                 0
             )
         }
-
+   
         const user = results[0]
-
+   
         if (user.PASSWORD_ENCRYPT !== reEncryptedPassword) {
             return sendEncryptedError(res, now, 
                 'password does not match',1
             )
         }
-
-        const responsePayload = {
-            status: 'success',
-            studentId: user.studentId,
-            firstName: user.STUDENT_FNAME,
-            lastname: user.STUDENT_LNAME,
-            personalityScores: [
-                user.PERSONA_TEST_1,
-                user.PERSONA_TEST_2,
-                user.PERSONA_TEST_3,
-                user.PERSONA_TEST_4
-            ],
-            selectedDegree: user.SELECTED_DEGREE_NO,
-            degreeScores: user.DEGREE_LINK_NO,
-            timestamp: now
-        };
-
-        const reencrypted = encryptData(
-            json.stringify(responsePayload), 
-            now
-        );
-        res.json({
-            success: true,
-            timestamp: now,
-            iv: reencrypted.iv,
-            content: reencrypted.content
-        });
-        
+    
     } catch (error) {
         sendEncryptedError(
             res, 
             now, 
-            'login decryption failed', 
+            'login confirmation decryption failed', 
             2
         );
     }
-});
 
-app.listen(3307, () => console.log(
-    'login server renning on port 3307'
-))
+    try{
+
+        const query = 'UPDATE INTO students' +
+            '(STUDENT_ID, STUDENT_FNAME, STUDENT_LNAME,  ' +
+            'STUDENT_EMAIL, PASSWORD_ENCRYPT, PERSONA_TEST_1, ' +
+            'PERSONA_TEST_2, PERSONA_TEST_3, PERSONA_TEST_4, ' + 
+            ' STUDENT_CREATION_TIME, SELECTED_DEGREE_NO,' +
+            'DEGREE_LINK_NO) ' +
+            'VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ' +
+            '?, ?, ?, ?, ?);';
+        const VALUES = [
+            input.studentID,
+            input.firstname,
+            input.lastname,
+            input.studentEmail,
+            encrypted.content.toString(),
+            input.persona1,
+            input.persona2,
+            input.persona3,
+            input.persona4,
+            now,
+            input.selectedDegreeNo,
+            degreeSetString
+        ];
+        db.query(query, VALUES, result)
+            if(err|| results.length === 0) {
+                return sendEncryptedError(
+                    res, input.studentEmail.toString + 
+                    "INSERT INTO FABLE f", 
+                    err.message
+                );
+            }
+            
+            const response = {
+                status: 'success',
+                message: 'student updated successfully',
+                timestamp: input.studentEmail.toString + 
+                "INSERT INTO FABLE f"
+            };
+            const encrypted = encryptData(
+                JSON.stringify(
+                    response
+                ), 
+                input.studentEmail.toString + 
+                "INSERT INTO FABLE f"
+            );
+
+            res.json({
+                success: true,
+                timestamp: now,
+                iv:encrypted.iv,
+                content: encrypted.content
+            });
+    }catch (error) {
+        return sendEncryptedError(
+            res,
+            now,
+            errormessage || 'Encryption or valitdation error'
+        );
+    }
+});
