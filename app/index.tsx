@@ -1,7 +1,6 @@
-import React, { useEffect, useRef } from "react";
-import 'react-native-gesture-handler';
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import React, { useEffect, useRef } from "react";
 import {
   Animated,
   Image,
@@ -10,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 export default function HomeScreen() {
@@ -54,6 +54,16 @@ export default function HomeScreen() {
         />
       </Animated.View>
 
+      <TouchableOpacity
+        onPress={() => router.push("/login")}
+        style={styles.loginButton}
+      >
+        <Image
+          source={require("../assets/images/Profile logo.png")}
+          style={styles.profileIcon}
+        />
+      </TouchableOpacity>
+
       <View style={styles.content}>
         <Image
           source={require("../assets/images/logo.png")}
@@ -61,19 +71,34 @@ export default function HomeScreen() {
           resizeMode="contain"
         />
         <Text style={styles.welcome}> 🎓Welcome!🎓</Text>
-
-        <TouchableOpacity
-          onPress={() => router.push("/personality")}
-          style={styles.button}
-        >
-          <Text style={styles.buttonText}>Take a Personality Test</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  loginButton: {
+    position: "absolute",
+    top: 100,
+    right: 20,
+    backgroundColor: "white",
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  profileIcon: {
+    width: 30,
+    height: 30,
+    tintColor: "#4B0082",
+  },
   content: {
     flex: 1,
     alignItems: "center",
@@ -83,6 +108,7 @@ const styles = StyleSheet.create({
   logo: {
     width: 400,
     height: 500,
+    marginTop: 50,
     marginBottom: 5,
   },
   welcome: {
@@ -91,17 +117,5 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     fontWeight: "600",
     borderColor: "purple",
-  },
-  button: {
-    backgroundColor: "white",
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 30,
-    borderColor: "purple",
-  },
-  buttonText: {
-    color: "#4B0082",
-    fontSize: 20,
-    fontWeight: "600",
   },
 });
