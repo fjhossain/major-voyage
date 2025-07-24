@@ -15,6 +15,7 @@ async function handleServiceRequest(serviceData) {
             persona3,
             persona4,
             selectedDegreeNo,
+            degreeSetString,
             timekey
         } = payload;
         const postdata ={
@@ -28,10 +29,11 @@ async function handleServiceRequest(serviceData) {
             persona2,
             persona3,
             persona4,
-            selectedDegreeNo
+            selectedDegreeNo,
+            degreeSetString
         };
         try{
-            const res = await axios.post('http://localhost:3306/register', postdata);
+            await axios.post('http://localhost:3306/register', postdata);
             console.log("account created: ", email.toString());
         } catch (err) {
             console.error('account creation failed: ' + email.toString() + " error: ", err.content().toString());
@@ -46,12 +48,47 @@ async function handleServiceRequest(serviceData) {
         };
 
         try {
-            const res = await axios.post('http://localhost:3306/register', loginData);
+            await axios.post('http://localhost:3306/register', loginData);
             console.log('login prep successful', email);            
         } catch (err) {
             console.log('login prep failed on: ' + email.toString() + " error: ", err.message);
         }
-    }else {
+    }else if (service === 'update'){
+        const {
+            studentId,
+            firstName,
+            lastName,
+            email,
+            password,
+            persona1,
+            persona2,
+            persona3,
+            persona4,
+            selectedDegreeNo,
+            degreeSetString,
+            timekey
+        } = payload;
+        postdata ={
+            encryptedField:password,
+            timekey,
+            studentId,
+            firstName,
+            lastName,
+            studendEmail:email,
+            persona1,
+            persona2,
+            persona3,
+            persona4,
+            selectedDegreeNo,
+            degreeSetString
+        };
+        try {
+            await axios.post('http://localhost:3306/update', postdata);
+            console.log("account created: ", email.toString());
+        } catch (error) {
+            
+        }
+    } else {
         console.log('Unsupported service type: ', service);
     }
 }

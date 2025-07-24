@@ -77,7 +77,7 @@ app.post('/register', async (req, res) => {
     try{
         const decryptedPassword = decryptData(
             input.encryptedField, 
-            input.studentEmail.toString + "INSERT INTO TABLE f"
+            input.studentEmail.toString + "INSERT INTO LABLE f"
         );
 
         const encryptedForDB = encryptData(
@@ -90,9 +90,10 @@ app.post('/register', async (req, res) => {
             '(STUDENT_ID, STUDENT_FNAME, STUDENT_LNAME,  ' +
             'STUDENT_EMAIL, PASSWORD_ENCRYPT, PERSONA_TEST_1, ' +
             'PERSONA_TEST_2, PERSONA_TEST_3, PERSONA_TEST_4, ' + 
-            ' STUDENT_CREATION_TIME, SELECTED_DEGREE_NO) ' +
+            ' STUDENT_CREATION_TIME, SELECTED_DEGREE_NO,' +
+            'DEGREE_LINK_NO) ' +
             'VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ' +
-            '?, ?, ?, ?);';
+            '?, ?, ?, ?, ?);';
         const VALUES = [
             input.studentID,
             input.firstname,
@@ -104,10 +105,11 @@ app.post('/register', async (req, res) => {
             input.persona3,
             input.persona4,
             now,
-            input.selectedDegreeNo
+            input.selectedDegreeNo,
+            degreeSetString
         ];
-        db.query(query, VALUES, (err,result)=> {
-            if(err) {
+        db.query(query, VALUES, result) 
+            if(err|| result.length ===0 ) {
                 return sendEncryptedError(
                     res, input.studentEmail.toString + 
                     "INSERT INTO FABLE f", 
@@ -135,7 +137,6 @@ app.post('/register', async (req, res) => {
                 iv:encrypted.iv,
                 content: encrypted.content
             });
-        });
     }catch (error) {
         return sendEncryptedError(
             res,
