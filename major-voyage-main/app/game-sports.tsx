@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
 
 type Category = "training" | "equipment" | "marketing";
 
@@ -9,197 +9,196 @@ type Option = {
   impact: number;
 };
 
-const options: Record<Category, Option[]> = {
-  training: [
-    { label: "Basic Training ($10K)", cost: 10000, impact: 1 },
-    { label: "Advanced Training ($30K)", cost: 30000, impact: 3 },
-    { label: "Elite Training ($50K)", cost: 50000, impact: 5 },
-    { label: "Performance Coaching ($70K)", cost: 70000, impact: 7 },
-    { label: "Full International Program ($90K)", cost: 90000, impact: 9 },
-  ],
-  equipment: [
-    { label: "Standard Gear ($10K)", cost: 10000, impact: 1 },
-    { label: "Upgraded Gear ($25K)", cost: 25000, impact: 3 },
-    { label: "Pro Gear ($40K)", cost: 40000, impact: 5 },
-    { label: "Custom Smart Equipment ($60K)", cost: 60000, impact: 7 },
-    { label: "AI-Enhanced Gear Set ($80K)", cost: 80000, impact: 9 },
-  ],
-  marketing: [
-    { label: "Local Ads ($5K)", cost: 5000, impact: 1 },
-    { label: "Online Campaign ($15K)", cost: 15000, impact: 3 },
-    { label: "National Promo ($30K)", cost: 30000, impact: 5 },
-    { label: "Influencer Blitz ($45K)", cost: 45000, impact: 7 },
-    { label: "Global Sponsorship Deal ($60K)", cost: 60000, impact: 9 },
-  ],
+type LevelOptions = {
+  [key in Category]: Option[];
 };
 
-export default function BudgetChallenge() {
-  const [budget, setBudget] = useState<number>(100000);
-  const [selected, setSelected] = useState<Record<Category, Option | null>>({
-    training: null,
-    equipment: null,
-    marketing: null,
-  });
-  const [result, setResult] = useState<string>("");
+const levelOptions: LevelOptions[] = [
+  {
+    training: [
+      { label: "Basic Training ($10K)", cost: 10, impact: 1 },
+      { label: "Advanced Training ($20K)", cost: 20, impact: 3 },
+      { label: "Elite Training ($30K)", cost: 30, impact: 5 },
+    ],
+    equipment: [
+      { label: "Standard Gear ($10K)", cost: 10, impact: 1 },
+      { label: "Pro Gear ($30K)", cost: 30, impact: 5 },
+    ],
+    marketing: [
+      { label: "Local Ads ($5K)", cost: 5, impact: 1 },
+      { label: "National Promo ($30K)", cost: 30, impact: 5 },
+    ],
+  },
+  {
+    training: [
+      { label: "Performance Coaching ($40K)", cost: 40, impact: 7 },
+      { label: "Full International Program ($60K)", cost: 60, impact: 9 },
+    ],
+    equipment: [
+      { label: "Smart Equipment ($40K)", cost: 40, impact: 7 },
+      { label: "AI-Enhanced Gear ($60K)", cost: 60, impact: 9 },
+    ],
+    marketing: [
+      { label: "Influencer Blitz ($40K)", cost: 40, impact: 7 },
+      { label: "Global Deal ($60K)", cost: 60, impact: 9 },
+    ],
+  },
+  {
+    training: [
+      { label: "Olympic-Level Bootcamp ($80K)", cost: 80, impact: 10 },
+    ],
+    equipment: [
+      { label: "Neural Performance Gear ($80K)", cost: 80, impact: 10 },
+    ],
+    marketing: [{ label: "Metaverse Branding ($80K)", cost: 80, impact: 10 }],
+  },
+];
 
-  function selectOption(category: Category, option: Option) {
-    const old = selected[category];
-    const oldCost = old?.cost || 0;
-    const newBudget = budget + oldCost - option.cost;
+const maxImpactPerLevel = levelOptions.map((level) =>
+  Object.values(level).reduce((sum, options) => {
+    const max = Math.max(...options.map((opt) => opt.impact));
+    return sum + max;
+  }, 0)
+);
+const totalMaxImpact = maxImpactPerLevel.reduce((a, b) => a + b, 0);
 
-    if (newBudget < 0) {
-      alert("❌ Not enough budget for this choice!");
-      return;
-    }
+export default function SportsAdminGame() {
+  const [level, setLevel] = useState(0);
+  const [selections, setSelections] = useState<
+    Partial<Record<Category, Option>>
+  >({});
+  const [totalScore, setTotalScore] = useState(0);
+  const [showResult, setShowResult] = useState(false);
 
-    setSelected({ ...selected, [category]: option });
-    setBudget(newBudget);
-  }
+  const currentOptions = levelOptions[level];
 
-  function calculateResult() {
-    const totalImpact =
-      (selected.training?.impact || 0) +
-      (selected.equipment?.impact || 0) +
-      (selected.marketing?.impact || 0);
+  const handleSelect = (category: Category, option: Option) => {
+    setSelections((prev) => ({
+      ...prev,
+      [category]: option,
+    }));
+  };
 
-    if (totalImpact >= 24) {
-      setResult("🏆 Legendary Season! Your leadership was elite.");
-    } else if (totalImpact >= 15) {
-      setResult("👍 Great Season. The team performed very well.");
-    } else if (totalImpact >= 8) {
-      setResult("😐 Decent Season. You managed to stay competitive.");
+  const handleNext = () => {
+    const levelScore = Object.values(selections).reduce(
+      (sum, opt) => sum + (opt?.impact || 0),
+      0
+    );
+    const updatedTotal = totalScore + levelScore;
+
+    if (level < levelOptions.length - 1) {
+      setTotalScore(updatedTotal);
+      setSelections({});
+      setLevel(level + 1);
     } else {
-      setResult("😓 Rough Year. Poor planning impacted your team.");
+      setTotalScore(updatedTotal);
+      setShowResult(true);
     }
-  }
+  };
 
-  function resetGame() {
-    setBudget(100000);
-    setSelected({ training: null, equipment: null, marketing: null });
-    setResult("");
+  const handleRestart = () => {
+    setLevel(0);
+    setSelections({});
+    setTotalScore(0);
+    setShowResult(false);
+  };
+
+  if (showResult) {
+    const passed = totalScore >= totalMaxImpact * 0.7;
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Game Over</Text>
+        <Text style={styles.result}>
+          Your Total Score: {totalScore} / {totalMaxImpact}
+        </Text>
+        <Text style={[styles.result, { color: passed ? "green" : "red" }]}>
+          {passed ? "You Passed!" : "You Failed!"}
+        </Text>
+        <Pressable onPress={handleRestart} style={styles.button}>
+          <Text style={styles.buttonText}>Restart</Text>
+        </Pressable>
+      </View>
+    );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>💰 Budget Challenge</Text>
-      <Text style={styles.budget}>
-        Remaining Budget: ${budget.toLocaleString()}
-      </Text>
+    <ScrollView style={styles.scroll}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Level {level + 1}</Text>
 
-      {result === "" ? (
-        <>
-          {Object.keys(options).map((category) => {
-            const typedCategory = category as Category;
-            return (
-              <View key={typedCategory} style={styles.section}>
-                <Text style={styles.sectionTitle}>
-                  {typedCategory.toUpperCase()}
-                </Text>
-                {options[typedCategory].map((option: Option, index: number) => (
-                  <Pressable
-                    key={index}
-                    style={[
-                      styles.optionButton,
-                      selected[typedCategory]?.label === option.label &&
-                        styles.selected,
-                    ]}
-                    onPress={() => selectOption(typedCategory, option)}
-                  >
-                    <Text style={styles.optionText}>{option.label}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            );
-          })}
-          <Pressable style={styles.submitButton} onPress={calculateResult}>
-            <Text style={styles.submitText}>Submit Choices</Text>
+        {(Object.keys(currentOptions) as Category[]).map((category) => (
+          <View key={category}>
+            <Text style={styles.category}>{category.toUpperCase()}</Text>
+            {currentOptions[category].map((opt, index) => {
+              const selected = selections[category]?.label === opt.label;
+              return (
+                <Pressable
+                  key={index}
+                  onPress={() => handleSelect(category, opt)}
+                  style={[styles.option, selected && styles.selected]}
+                >
+                  <Text style={styles.optionText}>{opt.label}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        ))}
+
+        {Object.keys(selections).length === 3 && (
+          <Pressable onPress={handleNext} style={styles.button}>
+            <Text style={styles.buttonText}>Next</Text>
           </Pressable>
-        </>
-      ) : (
-        <>
-          <Text style={styles.result}>{result}</Text>
-          <Pressable style={styles.resetButton} onPress={resetGame}>
-            <Text style={styles.resetText}>🔁 Try Again</Text>
-          </Pressable>
-        </>
-      )}
-    </View>
+        )}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  scroll: { flex: 1 },
   container: {
-    flex: 1,
-    backgroundColor: "#f1f8e9",
     padding: 20,
-    justifyContent: "center",
+    paddingTop: 50,
+    backgroundColor: "#fff",
+    minHeight: "100%",
   },
   title: {
     fontSize: 28,
     fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 10,
-    color: "#33691e",
-  },
-  budget: {
-    fontSize: 18,
-    textAlign: "center",
     marginBottom: 20,
   },
-  section: {
-    marginBottom: 20,
+  category: {
+    fontSize: 20,
+    fontWeight: "600",
+    marginTop: 15,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#558b2f",
-  },
-  optionButton: {
-    backgroundColor: "white",
+  option: {
     padding: 12,
+    backgroundColor: "#eee",
     borderRadius: 10,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: "#ccc",
+    marginVertical: 5,
   },
   selected: {
-    borderColor: "#558b2f",
-    backgroundColor: "#dcedc8",
+    backgroundColor: "#cce5ff",
   },
   optionText: {
     fontSize: 16,
-    color: "#33691e",
   },
-  submitButton: {
-    backgroundColor: "#689f38",
-    padding: 14,
+  button: {
+    backgroundColor: "#007bff",
+    padding: 15,
     borderRadius: 10,
-    marginTop: 20,
+    marginTop: 25,
     alignItems: "center",
   },
-  submitText: {
-    color: "white",
-    fontSize: 15,
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
     fontWeight: "bold",
   },
   result: {
     fontSize: 20,
+    marginVertical: 10,
     textAlign: "center",
-    marginVertical: 30,
-    color: "#33691e",
-    fontWeight: "600",
-  },
-  resetButton: {
-    backgroundColor: "#33691e",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  resetText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 15,
   },
 });
-
