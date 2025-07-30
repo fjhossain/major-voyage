@@ -3,9 +3,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Modal,
   Pressable,
+  SafeAreaView,
   StyleSheet,
   Text,
-  View
+  View,
 } from 'react-native';
 
 /* ─── Types ─────────────────────────────────────────────────── */
@@ -96,116 +97,127 @@ export default function App() {
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar style="light" />
-      <Text style={styles.title}>🏨 Hotel Havoc</Text>
-      <Text style={styles.stats}>💵 {coins}  😊 {happiness}</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <StatusBar style="light" />
+        <Text style={styles.title}>🏨 Hotel Havoc</Text>
+        <Text style={styles.stats}>💵 {coins}  😊 {happiness}</Text>
 
-      <View style={styles.grid}>
-        {rooms.map(room => (
-          <Pressable
-            key={room.id}
-            onPress={() => handleRoomPress(room)}
-            style={[
-              styles.room,
-              room.status === 'vacant' && styles.vacant,
-              room.status === 'occupied' && styles.occupied,
-              room.status === 'checkout' && styles.checkout,
-            ]}
-          >
-            <Text style={styles.roomText}>
-              {room.status === 'vacant' && '🛏️'}
-              {room.status === 'occupied' && `⏳${room.timer}`}
-              {room.status === 'checkout' && `🧹${room.timer}`}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
-
-      {/* Instructions Modal */}
-      <Modal visible={showInstructions} transparent animationType="slide">
-        <View style={styles.modalContainer}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>🧼 How to Play</Text>
-            <Text style={styles.modalText}>
-              Guests will check in. After a short time, they request checkout (🧹).
-              Tap the room before the timer hits 0 to clean and earn coins!
-              Missed checkouts reduce happiness. Survive 30 seconds!
-            </Text>
+        <View style={styles.grid}>
+          {rooms.map(room => (
             <Pressable
-              style={styles.modalButton}
-              onPress={() => setShowInstructions(false)}
+              key={room.id}
+              onPress={() => handleRoomPress(room)}
+              style={[
+                styles.room,
+                room.status === 'vacant' && styles.vacant,
+                room.status === 'occupied' && styles.occupied,
+                room.status === 'checkout' && styles.checkout,
+              ]}
             >
-              <Text style={styles.modalButtonText}>Start Game</Text>
+              <Text style={styles.roomText}>
+                {room.status === 'vacant' && '🛏️'}
+                {room.status === 'occupied' && `⏳${room.timer}`}
+                {room.status === 'checkout' && `🧹${room.timer}`}
+              </Text>
             </Pressable>
-          </View>
+          ))}
         </View>
-      </Modal>
 
-      {/* Game Over Modal */}
-      <Modal visible={gameOver} transparent animationType="fade">
-        <View style={styles.modalContainer}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>⏱ Time's Up!</Text>
-            <Text style={styles.modalText}>
-              You earned {coins} coins and had {happiness} happiness.
-            </Text>
-            <Text style={styles.modalText}>
-              {coins >= 3
-                ? "🎉 Congratulations! You passed!"
-                : "😢 You didn’t earn enough coins. Try again!"}
-            </Text>
-            <Pressable style={styles.modalButton} onPress={resetGame}>
-              <Text style={styles.modalButtonText}>Play Again</Text>
-            </Pressable>
+        {/* Instructions Modal */}
+        <Modal visible={showInstructions} transparent animationType="slide">
+          <View style={styles.modalContainer}>
+            <View style={styles.modalBox}>
+              <Text style={styles.modalTitle}>🧼 How to Play</Text>
+              <Text style={styles.modalText}>
+                Guests will check in. After a short time, they request checkout (🧹).
+                Tap the room before the timer hits 0 to clean and earn coins!
+                Missed checkouts reduce happiness. Survive 30 seconds!
+              </Text>
+              <Pressable
+                style={styles.modalButton}
+                onPress={() => setShowInstructions(false)}
+              >
+                <Text style={styles.modalButtonText}>Start Game</Text>
+              </Pressable>
+            </View>
           </View>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+
+        {/* Game Over Modal */}
+        <Modal visible={gameOver} transparent animationType="fade">
+          <View style={styles.modalContainer}>
+            <View style={styles.modalBox}>
+              <Text style={styles.modalTitle}>⏱ Time's Up!</Text>
+              <Text style={styles.modalText}>
+                You earned {coins} coins and had {happiness} happiness.
+              </Text>
+              <Text style={styles.modalText}>
+                {coins >= 3
+                  ? "🎉 Congratulations! You passed!"
+                  : "😢 You didn’t earn enough coins. Try again!"}
+              </Text>
+              <Pressable style={styles.modalButton} onPress={resetGame}>
+                <Text style={styles.modalButtonText}>Play Again</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
+      </View>
+    </SafeAreaView>
   );
 }
 
 /* ─── Styles ───────────────────────────────────────────────── */
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#4B0082', // deep purple background
+  },
   container: {
     flex: 1,
-    backgroundColor: '#14213d',
+    backgroundColor: '#4B0082',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 20,
   },
   title: {
-    color: '#fca311',
+    color: '#D8BFD8', // light lavender
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 12,
   },
   stats: {
-    color: '#e5e5e5',
+    color: '#E6E6FA', // light lavender
     marginBottom: 20,
     fontSize: 16,
   },
   grid: {
     flexDirection: 'row',
-    gap: 10,
+    justifyContent: 'center',  // centers rooms closer
+    width: '100%',
+    marginBottom: 30,
   },
   room: {
-    width: 90,
-    height: 90,
+    width: 75,
+    height: 75,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+    marginHorizontal: 8,  // tighter spacing between squares
   },
   roomText: {
     fontSize: 24,
+    color: '#fff', // white text for visibility
   },
   vacant: {
-    backgroundColor: '#2d6a4f',
+    backgroundColor: '#B57EDC', // lavender
   },
   occupied: {
-    backgroundColor: '#d90429',
+    backgroundColor: '#7B68EE', // medium purple
   },
   checkout: {
-    backgroundColor: '#4361ee',
+    backgroundColor: '#5D3A99', // dark purple
   },
   modalContainer: {
     flex: 1,
@@ -225,16 +237,16 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 12,
-    color: '#000',
+    color: '#4B0082', // deep purple
   },
   modalText: {
     fontSize: 16,
     textAlign: 'center',
-    color: '#333',
+    color: '#4B0082', // deep purple
     marginBottom: 16,
   },
   modalButton: {
-    backgroundColor: '#fca311',
+    backgroundColor: '#7B68EE', // medium purple
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
