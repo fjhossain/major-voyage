@@ -12,8 +12,9 @@ const db = mysql.createConnection({
     database: 'csi_4999projectset'
 });
 
-const algorithm = 'aes=256-cbc';
+const crypto = require('crypto');
 
+const algorithm = 'aes-256-cbc';
 function deriveKey(secret) {
     // ensure the key is 32 bytes
     return crypto.createHash('sha256').update(secret).digest();
@@ -73,19 +74,41 @@ function sendEncryptedError(res, timestamp, message, reason){
         reason: reasonStr
     });
 }
+function getScoresBasedOnStudentNo(studentID){
+          const scoreQuery = `
+        SELECT degree_DEGREE_NO AS degreeId, SCORE_PERCENT AS scorePercent
+        FROM student_degree_scores
+        WHERE students_STUDENT_NO = ?
+      `;
+        var scoreResults
+        db.query(scoreQuery, [studentID],  scoreResults) 
+        if (scoreResults.length() >= 1) {
+                log.error('failed to retrieve scores');
+                scoreResults = getScoresBasedOnStudentNo(studentID);
+                return scoreResults
+        }
+        
+        return scoreResults;
+
+}
 /*
 STUDENT_NO, 
-STUDENT_ID, 
-STUDENT_FNAME, 
-STUDENT_LNAME, 
+STUDENT_EMAIL, 
+STUDENT_USERNAME, 
 PASSWORD_ENCRYPT, 
-PERSONA_TEST_1, 
+PERSONA_TEST_1,
 PERSONA_TEST_2, 
 PERSONA_TEST_3, 
 PERSONA_TEST_4, 
 STUDENT_CREATION_TIME, 
-SELECTED_DEGREE_NO, 
-DEGREE_LINK_NO*/
+DEGREE_LINK_NO
+*/
+/*
+SCORE_SET_NO, 
+SCORE_PERCENT, 
+degree_DEGREE_NO, 
+students_STUDENT_NO
+*/
 app.post('/login', (req, res) => {
     const{userEmail, encryptedField, timekey} = req.body;
     const now = Date.now();
@@ -124,11 +147,11 @@ app.post('/login', (req, res) => {
                 'password does not match',1
             )
         }
-
+        results = getScoresBasedOnStudentNo()
         const responsePayload = {
             status: 'success',
             studentId: user.studentId,
-            firstName: user.STUDENT_FNAME,
+            userName: user.STUDENT_USERNAME,
             lastname: user.STUDENT_LNAME,
             personalityScores: [
                 user.PERSONA_TEST_1,
@@ -137,10 +160,9 @@ app.post('/login', (req, res) => {
                 user.PERSONA_TEST_4
             ],
             selectedDegree: user.SELECTED_DEGREE_NO,
-            degreeScores: user.DEGREE_LINK_NO,
+            degreeScores: results,
             timestamp: now
         };
-
         const reencrypted = encryptData(
             json.stringify(responsePayload), 
             now
@@ -161,6 +183,38 @@ app.post('/login', (req, res) => {
         );
     }
 });
+
+
+function deriveKey(secret) {
+    return crypto.createHash('sha256').update(secret).digest();
+}
+
+function encryptData(data, keySource) {
+    const key = deriveKey(keySource.toString());
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv(algorithm, key, iv);
+    let encrypted = cipher.update(data, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return {
+        iv: iv.toString('hex'),
+        content: encrypted
+    };
+}
+
+function decryptData(encrypted, keySource, ivHex) {
+    const key = deriveKey(keySource.toString());
+    const iv = Buffer.from(ivHex, 'hex');
+    const decipher = crypto.createDecipheriv(algorithm, key, iv);
+    let decrypted = decipher.update(encrypted.content, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+}
+
+function encryptPass(password, email) {
+    return encryptData(password, email + "INSERT INTO TABLE f");
+}
+
+module.exports = { encryptPass, decryptData };
 
 app.listen(3307, () => console.log(
     'login server renning on port 3307'
