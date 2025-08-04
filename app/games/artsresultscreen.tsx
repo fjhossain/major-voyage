@@ -1,52 +1,95 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { Button, ScrollView, StyleSheet, Text } from 'react-native';
 
-export default function MemoryMazeResultScreen() {
-  const score = 2; // Example static score
-  const total = 3;
-
+export default function ArtsResultScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>🎭 Arts Major</Text>
-      <Text style={styles.description}>
-       🎉 Congratulations on scoring higher in Memory Maze!
-This suggests you have strong creativity and attention to detail. If you enjoy expressing ideas, thinking critically, and exploring fields like theatre, literature, or visual arts, the Arts major could be a great fit for your talents and interests.
+    <LinearGradient colors={['#B57EDC', '#E6E6FA']} style={styles.gradient}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.backgroundEmojis}>
+          🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️
+        </Text>
+
+        <Text style={styles.title}>🎭 Arts Major: You're a Natural Fit!</Text>
+
+        <Text style={styles.highlight}>
+          🥇 You scored highest in the Arts game!
+        </Text>
+
+        <Text style={styles.description}>
+          Your performance in Memory Maze shows creative thinking, pattern recognition, and emotional expression—core strengths for arts-related disciplines.
+        </Text>
+
+        <Text style={styles.personality}>
+          As an <Text style={styles.bold}>ESFP</Text>, you're energized by real-world interaction, spontaneous expression, and engaging others emotionally. ESFPs often thrive in the performing arts, visual design, media, and literature—fields where their charisma and enthusiasm shine. 
+        </Text>
+
+        <Text style={styles.benefit}>
+          Research supports that matching your major with your personality type increases satisfaction and success. Studies like Goldschmid (1967) show personality traits can predict interest and performance in certain fields—ESFPs are often drawn to expressive, interactive disciplines like the arts.
+        </Text>
+ <Text>
+        Want to try again? Tap below:
+        
       </Text>
-
-      <Text style={styles.resultTitle}>Memory Maze Result</Text>
-      <Text style={styles.resultText}>Score: {score} / {total}</Text>
-
-      <Button title="Continue" onPress={() => {}} />
-    </View>
+      <Button title="🔁 Play Again" onPress={() => {}} />
+      </ScrollView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  gradient: {
     flex: 1,
-    backgroundColor: '#A176C6',
-    justifyContent: 'center',
-    alignItems: 'center',
+  },
+  container: {
+    flexGrow: 1,
     padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backgroundEmojis: {
+    fontSize: 26,
+    opacity: 0.15,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    textAlign: 'center',
   },
   title: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: 'bold',
+    color: '#4B0082',
     marginBottom: 12,
+    textAlign: 'center',
+  },
+  highlight: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#4B0082',
+    marginBottom: 12,
+    textAlign: 'center',
   },
   description: {
     fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 30,
     color: '#333',
+    textAlign: 'center',
+    marginBottom: 16,
   },
-  resultTitle: {
-    fontSize: 22,
+  personality: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  benefit: {
+    fontSize: 14,
+    color: '#444',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  bold: {
     fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  resultText: {
-    fontSize: 20,
-    marginBottom: 20,
   },
 });
