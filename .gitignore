@@ -37,3 +37,8 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+JustinsguessworkArea/backend-nodejs/serviceRouter (2).js
+JustinsguessworkArea/backend-nodejs/Server (2).js
+JustinsguessworkArea/backend-nodejs/login (2).js
+JustinsguessworkArea/backend-nodejs/addstudent (2).js
+JustinsguessworkArea/backend-expogo/ServerRequestHandler (2).js
