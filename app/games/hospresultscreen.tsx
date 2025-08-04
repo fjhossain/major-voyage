@@ -1,53 +1,95 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { Button, ScrollView, StyleSheet, Text } from 'react-native';
 
-export default function HotelHavocResultScreen() {
-  const coins = 4; // Example static score
-  const happiness = 5;
-
+export default function HospitalityResultScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>🏨 Hospitality Management</Text>
-      <Text style={styles.description}>
-        🎉 Congratulations on scoring higher in Hotel Havoc!
-Your quick thinking and ability to manage multiple tasks under pressure are exactly what the Hospitality Management major is all about. If you enjoy creating positive guest experiences, leading teams, and working in dynamic environments like hotels and events, this major might be the perfect match for you.
+    <LinearGradient colors={['#B57EDC', '#E6E6FA']} style={styles.gradient}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.backgroundEmojis}>
+          🛎️🏨🧼👥💼🍽️🎉💬🛏️🧳🛎️🏨🧼👥💼🍽️🎉💬🛏️🧳🛎️🛎️🏨🧼👥💼🍽️🎉💬🛏️🧳🛎️🛎️🏨🧼👥💼🍽️🎉💬🛏️🧳🛎️🛎️🏨🧼👥💼🍽️🎉💬🛏️🧳🛎️🛎️🏨🧼👥💼🍽️🎉💬🛏️🧳🛎️🛎️🏨🧼👥💼🍽️🎉💬🛏️🧳🛎️🛎️🏨🧼👥💼🍽️🎉💬🛏️🧳🛎️🛎️🏨🧼👥💼🍽️🎉💬🛏️🧳🛎️🛎️🏨🧼👥💼🍽️🎉💬🛏️🧳🛎️🛎️🏨🧼👥💼🍽️🎉💬🛏️🧳🛎️🛎️🏨🧼👥💼🍽️🎉💬🛏️🧳🛎️🛎️🏨🧼👥💼🍽️🎉💬🛏️🧳🛎️🛎️🏨🧼👥💼🍽️🎉💬🛏️🧳🛎️🛎️🏨🧼👥💼🍽️🎉💬🛏️🧳🛎️🛎️🏨🧼👥💼🍽️🎉💬🛏️🧳🛎️🛎️🏨🧼👥💼🍽️🎉💬🛏️🧳🛎️🛎️🏨🧼👥💼🍽️🎉💬🛏️🧳🛎️
+        </Text>
+
+        <Text style={styles.title}>🏨 Hospitality Major: You’re Built for This!</Text>
+
+        <Text style={styles.highlight}>
+          🥇 You scored highest in the Hospitality game!
+        </Text>
+
+        <Text style={styles.description}>
+          Your top score in Hotel Havoc reveals your multitasking ability, interpersonal skills, and knack for keeping people happy—all essential in the world of hospitality and event management.
+        </Text>
+
+        <Text style={styles.personality}>
+          As an <Text style={styles.bold}>ESFP</Text>, you’re outgoing, empathetic, and excel in real-time situations. Hospitality is ideal for ESFPs because it thrives on spontaneity, connection, and hands-on service—areas where ESFPs feel most fulfilled.
+        </Text>
+
+        <Text style={styles.benefit}>
+          According to Goldschmid (1967), personality can help predict academic and career choices. Matching your ESFP traits to majors like hospitality or tourism enhances satisfaction, motivation, and success across your studies and beyond.
+        </Text>
+<Text>
+        Want to try again? Tap below:
+        
       </Text>
-
-      <Text style={styles.resultTitle}>Hotel Havoc Result</Text>
-      <Text style={styles.resultText}>Coins Earned: {coins}</Text>
-      <Text style={styles.resultText}>Happiness: {happiness}</Text>
-
-      <Button title="Continue" onPress={() => {}} />
-    </View>
+        <Button title="🔁 Play Again" onPress={() => {}} />
+      </ScrollView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  gradient: {
     flex: 1,
-    backgroundColor: '#A176C6',
-    justifyContent: 'center',
-    alignItems: 'center',
+  },
+  container: {
+    flexGrow: 1,
     padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backgroundEmojis: {
+    fontSize: 26,
+    opacity: 0.15,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    textAlign: 'center',
   },
   title: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: 'bold',
+    color: '#4B0082',
     marginBottom: 12,
+    textAlign: 'center',
+  },
+  highlight: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#4B0082',
+    marginBottom: 12,
+    textAlign: 'center',
   },
   description: {
     fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 30,
     color: '#333',
+    textAlign: 'center',
+    marginBottom: 16,
   },
-  resultTitle: {
-    fontSize: 22,
+  personality: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  benefit: {
+    fontSize: 14,
+    color: '#444',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  bold: {
     fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  resultText: {
-    fontSize: 20,
-    marginBottom: 10,
   },
 });
