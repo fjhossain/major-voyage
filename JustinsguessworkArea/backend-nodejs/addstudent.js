@@ -153,7 +153,7 @@ app.post('/register', async (req, res) => {
                 );
             }
             db.query(queryThree, valuesThree, (err, result, queryReturnThree))
-            varIncrenmentation = 0;
+            varIncrenmentation = 1;
             input.degreePercentSet.forEach(lineItem => {
                 const varsTwo = {
                     lineItem,
