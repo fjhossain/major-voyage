@@ -69,7 +69,32 @@ function sendEncryptedError(res, timestamp, message){
         content:encrypted.content
     });
 }
-
+/*
+table 'students':
+STUDENT_NO, 
+STUDENT_EMAIL, 
+STUDENT_USERNAME, 
+PASSWORD_ENCRYPT, 
+PERSONA_TEST_1, 
+PERSONA_TEST_2, 
+PERSONA_TEST_3, 
+PERSONA_TEST_4, 
+STUDENT_CREATION_TIME, 
+DEGREE_LINK_NO
+table 'degree':
+DEGREE_NO, 
+PERSONA_1_PREF, 
+PERSONA_2_PREF, 
+PERSONA_3_PREF, 
+PERSONA_4_PREF, 
+DEGREE_NAME, 
+degree_DEGREE_NO
+table 'carrerscores':
+SCORE_SET_NO, 
+SCORE_PERCENT, 
+degree_DEGREE_NO, 
+students_STUDENT_NO
+*/
 app.post('/register', async (req, res) => {
     const input = req.body;
     const now = Date.now();
@@ -87,13 +112,9 @@ app.post('/register', async (req, res) => {
         );
 
         const query = 'INSERT INTO students' +
-            '(STUDENT_ID, STUDENT_FNAME, STUDENT_LNAME,  ' +
-            'STUDENT_EMAIL, PASSWORD_ENCRYPT, PERSONA_TEST_1, ' +
-            'PERSONA_TEST_2, PERSONA_TEST_3, PERSONA_TEST_4, ' + 
-            ' STUDENT_CREATION_TIME, SELECTED_DEGREE_NO,' +
-            'DEGREE_LINK_NO) ' +
-            'VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ' +
-            '?, ?, ?, ?, ?);';
+            '(STUDENT_NO, STUDENT_EMAIL, STUDENT_USERNAME, PASSWORD_ENCRYPT, PERSONA_TEST_1, PERSONA_TEST_2, ' +
+            'PERSONA_TEST_3, PERSONA_TEST_4, STUDENT_CREATION_TIME, DEGREE_LINK_NO) ' +
+            'VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?);';
         const VALUES = [
             input.studentID,
             input.firstname,
