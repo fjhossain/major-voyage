@@ -77,18 +77,43 @@ async function sendPacket(serviceToRequest, data) {
         console.error('failed to send data ', error);
     }
 }
-/*setOfData contains(in this order){
-    emailofstudent,
-    password,
-    studentId,
-    firstName,
-    lastName,
+/*
+table 'students':
+STUDENT_NO, 
+STUDENT_EMAIL, 
+STUDENT_USERNAME, 
+PASSWORD_ENCRYPT, 
+PERSONA_TEST_1, 
+PERSONA_TEST_2, 
+PERSONA_TEST_3, 
+PERSONA_TEST_4, 
+STUDENT_CREATION_TIME, 
+DEGREE_LINK_NO
+table 'degree':
+DEGREE_NO, 
+PERSONA_1_PREF, 
+PERSONA_2_PREF, 
+PERSONA_3_PREF, 
+PERSONA_4_PREF, 
+DEGREE_NAME, 
+degree_DEGREE_NO
+table 'carrerscores':
+SCORE_SET_NO, 
+SCORE_PERCENT, 
+degree_DEGREE_NO, 
+students_STUDENT_NO
+*/
+/*
+setOfData contains(in this order){
+    STUDENT_EMAIL, 
+    STUDENT_USERNAME, 
+    PASSWORD_ENCRYPT, 
     persona1,
     persona2,
     persona3,
     persona4,
     selectedDegreeNo, this can be set as a null variable, will handle as 0 which is the undecided var
-    numbers related to degree percents(can be up to 3 degrees for )
+    numbers related to degree percents(starting at 0 ending in the last degree)
 }
 */
 async function registerRequest(setOfData){
@@ -96,16 +121,14 @@ async function registerRequest(setOfData){
     const {
         email,
         password,
-        studentId,
-        firstName,
-        lastName,
+        studentName,
         persona1,
         persona2,
         persona3,
         persona4,
         selectedDegreeNo,
-        degreePercentString
     } = null;
+    const degreePercentSet = []
     selectedDegreeNo = 0;
     firstname = 'John';
     lastName = 'Doe';
@@ -115,36 +138,28 @@ async function registerRequest(setOfData){
                 email = dataItem;
                 break;
             case 1:
-                password = dataItem;
+                studentName = dataItem;
                 break;
             case 2:
-                studentId = dataItem;
+                password = dataItem;
                 break;
             case 3:
-                firstName = dataItem;
-                break;
-            case 4:
-                lastName = dataItem;
-                break;
-            case 5:
                 persona1 = dataItem;
                 break;
-            case 6:
+            case 4:
                 persona2 = dataItem;
                 break;
-            case 7:
+            case 5:
                 persona3 = dataItem;
                 break;
-            case 8:
+            case 6:
                 persona4 = dataItem;
                 break;
-            case 9:
+            case 7:
                 selectedDegreeNo = dataItem;
                 break;
-            case 10:
-                degreePercentString += (dataItem.toString + " ");
-                break;
             default:
+                degreePercentSet.push(dataItem);
                 break;
             
         }
@@ -156,17 +171,15 @@ async function registerRequest(setOfData){
     );
     sendPacket(
         'create_account', 
-        studentId,
-        firstName,
-        lastName,
         email,
-        encryptedPass,
+        encryptPass,
+        studentName,
         persona1,
         persona2,
         persona3,
         persona4,
         selectedDegreeNo,
-        degreeSetString,
+        degreePercentSet,
         Date.now()        
     );
 
@@ -266,60 +279,60 @@ async function loginrequest(email, password) {
         console.error("error detected in ServerRequestHandler.js", error);
     }
 } 
+/* 
+the set of degrees currently is:
+1: arts
+2: business
+3: Management
+4: hospitiality
+5: undecided
+6: informantion tech
+*/
 async function update(setOfData) {
     var iteration = 0;
     const {
         email,
         password,
-        studentId,
-        firstName,
-        lastName,
+        studentName,
         persona1,
         persona2,
         persona3,
         persona4,
         selectedDegreeNo,
-        degreePercentString
     } = null;
+    var degreePercentSet = []
     selectedDegreeNo = 0;
     firstname = 'John';
     lastName = 'Doe';
+    degreePercentSet = [];
     setOfData.forEach(dataItem => {
         switch (iteration) {
             case 0:
                 email = dataItem;
                 break;
             case 1:
-                password = dataItem;
+                studentName = dataItem;
                 break;
             case 2:
-                studentId = dataItem;
+                password = dataItem;
                 break;
             case 3:
-                firstName = dataItem;
-                break;
-            case 4:
-                lastName = dataItem;
-                break;
-            case 5:
                 persona1 = dataItem;
                 break;
-            case 6:
+            case 4:
                 persona2 = dataItem;
                 break;
-            case 7:
+            case 5:
                 persona3 = dataItem;
                 break;
-            case 8:
+            case 6:
                 persona4 = dataItem;
                 break;
-            case 9:
+            case 7:
                 selectedDegreeNo = dataItem;
                 break;
-            case 10:
-                degreePercentString += (dataItem.toString + " ");
-                break;
             default:
+                degreePercentSet.push(dataItem);
                 break;
             
         }
@@ -331,18 +344,16 @@ async function update(setOfData) {
     );
     sendPacket(
         'Update', 
-        studentId,
-        firstName,
-        lastName,
         email,
-        encryptedPass,
+        encryptPass,
+        studentName,
         persona1,
         persona2,
         persona3,
         persona4,
         selectedDegreeNo,
-        degreeSetString,
-        Date.now()        
+        degreePercentSet,
+        Date.now()      
     );
 
 }

@@ -67,6 +67,12 @@ function sendEncryptedError(res, timestamp, message, reason){
         default:
             reasonStr = "no";
             break;
+        case 3:
+            reasonStr = 'Failed insertion into carrerscores on update';
+            break;
+        case 4:
+            reasonStr = 'failed to insert a score to the table';
+            break;
     }
     const response = {
         status: 'error',
@@ -89,18 +95,16 @@ app.post('/update', async (req, res) => {
     const input = req.body;
     const now = Date.now();
     const {
-            password,
-            timekey,
-            studentId,
-            firstName,
-            lastName,
             email,
+            encryptedField,
+            studentName,
             persona1,
             persona2,
             persona3,
             persona4,
             selectedDegreeNo,
-            degreeSetString
+            degreePercentSet,
+            timeKey
         }= input
    try {
         const decryptedPassword = decryptData(encryptedField,timeKey);
@@ -130,13 +134,13 @@ app.post('/update', async (req, res) => {
         }
    
         const user = results[0]
-   
+        
         if (user.PASSWORD_ENCRYPT !== reEncryptedPassword) {
             return sendEncryptedError(res, now, 
                 'password does not match',1
             )
         }
-    
+        
     } catch (error) {
         sendEncryptedError(
             res, 
@@ -147,38 +151,58 @@ app.post('/update', async (req, res) => {
     }
 
     try{
-
+        const userNo = user.STUDENT_NO
         const query = 'UPDATE INTO students' +
-            '(STUDENT_ID, STUDENT_FNAME, STUDENT_LNAME,  ' +
-            'STUDENT_EMAIL, PASSWORD_ENCRYPT, PERSONA_TEST_1, ' +
-            'PERSONA_TEST_2, PERSONA_TEST_3, PERSONA_TEST_4, ' + 
-            ' STUDENT_CREATION_TIME, SELECTED_DEGREE_NO,' +
-            'DEGREE_LINK_NO) ' +
-            'VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ' +
-            '?, ?, ?, ?, ?);';
+            '(STUDENT_NO, STUDENT_EMAIL, STUDENT_USERNAME,  '+
+            'PERSONA_TEST_1, PERSONA_TEST_2, PERSONA_TEST_3, PERSONA_TEST_4, DEGREE_LINK_NO) ' +
+            'VALUES (?, ?, ?, ?, ?, ?, ?, ?);';
         const VALUES = [
-            input.studentID,
-            input.firstname,
-            input.lastname,
-            input.studentEmail,
-            encrypted.content.toString(),
-            input.persona1,
-            input.persona2,
-            input.persona3,
-            input.persona4,
-            now,
-            input.selectedDegreeNo,
-            degreeSetString
+            userNo,
+            email,
+            studentName,
+            persona1,
+            persona2,
+            persona3,
+            persona4,
+            selectedDegreeNo,
         ];
         db.query(query, VALUES, result)
             if(err|| results.length === 0) {
                 return sendEncryptedError(
                     res, input.studentEmail.toString + 
                     "INSERT INTO FABLE f", 
-                    err.message
+                    err.message,
+                    2
                 );
             }
-            
+        //SCORE_SET_NO, SCORE_PERCENT, degree_DEGREE_NO, students_STUDENT_NO
+        query = 'SELECT * FROM carrerscores WHERE students_STUDENT_NO = ?;'
+        db.query(query,userNo, result2s)
+        if(err|| results.length === 0) {
+                return sendEncryptedError(
+                    res, input.studentEmail.toString + 
+                    "INSERT INTO FABLE f", 
+                    err.message,3
+                );
+            }
+        result2s.forEach(item => {
+            const query = 'UPDATE INTO carrerscores (SCORE_SET_NO, SCORE_PERCENT, degree_DEGREE_NO, students_STUDENT_NO) VALUES (?, ?, ?, ?);'
+            const newSCORE_PERCENT = degreePercentSet[degree_DEGREE_NO - 1];
+            const values = {
+                item.SCORE_SET_NO,
+                newSCORE_PERCENT,
+                item.degree_DEGREE_NO,
+                userNo
+            }
+            db.query(query, values, (error, results, fields));
+            if(err|| results.length === 0) {
+                return sendEncryptedError(
+                    res, input.studentEmail.toString + 
+                    "INSERT INTO FABLE f", 
+                    err.message,4
+                );
+            }
+        });
             const response = {
                 status: 'success',
                 message: 'student updated successfully',
