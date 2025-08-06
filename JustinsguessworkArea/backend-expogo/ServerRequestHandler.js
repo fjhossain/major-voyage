@@ -279,6 +279,15 @@ async function loginrequest(email, password) {
         console.error("error detected in ServerRequestHandler.js", error);
     }
 } 
+/* 
+the set of degrees currently is:
+1: arts
+2: business
+3: Management
+4: hospitiality
+5: undecided
+6: informantion tech
+*/
 async function update(setOfData) {
     var iteration = 0;
     const {
@@ -291,6 +300,7 @@ async function update(setOfData) {
         persona4,
         selectedDegreeNo,
     } = null;
+    var degreePercentSet = []
     selectedDegreeNo = 0;
     firstname = 'John';
     lastName = 'Doe';
