@@ -76,7 +76,7 @@ function sendEncryptedError(res, timestamp, message, reason){
 }
 function getScoresBasedOnStudentNo(studentID){
           const scoreQuery = `
-        SELECT degree_DEGREE_NO AS degreeId, SCORE_PERCENT AS scorePercent
+        SELECT *
         FROM student_degree_scores
         WHERE students_STUDENT_NO = ?
       `;

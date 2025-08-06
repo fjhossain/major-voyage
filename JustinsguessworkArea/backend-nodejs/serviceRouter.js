@@ -51,32 +51,28 @@ async function handleServiceRequest(serviceData) {
         }
     }else if (service === 'update'){
         const {
-            studentId,
-            firstName,
-            lastName,
             email,
-            password,
-            persona1,
-            persona2,
-            persona3,
-            persona4,
-            selectedDegreeNo,
-            degreeSetString,
-            timekey
+        password,
+        studentName,
+        persona1,
+        persona2,
+        persona3,
+        persona4,
+        selectedDegreeNo,
+        degreePercentSet,
+        timekey
         } = payload;
         postdata ={
             encryptedField:password,
             timekey,
-            studentId,
-            firstName,
-            lastName,
+            studentName,
             studendEmail:email,
             persona1,
             persona2,
             persona3,
             persona4,
             selectedDegreeNo,
-            degreeSetString
+            degreePercentSet
         };
         try {
             await axios.post('http://localhost:3306/update', postdata);

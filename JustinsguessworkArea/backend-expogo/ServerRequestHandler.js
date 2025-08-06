@@ -344,18 +344,16 @@ async function update(setOfData) {
     );
     sendPacket(
         'Update', 
-        studentId,
-        firstName,
-        lastName,
         email,
-        encryptedPass,
+        encryptPass,
+        studentName,
         persona1,
         persona2,
         persona3,
         persona4,
         selectedDegreeNo,
-        degreeSetString,
-        Date.now()        
+        degreePercentSet,
+        Date.now()      
     );
 
 }
