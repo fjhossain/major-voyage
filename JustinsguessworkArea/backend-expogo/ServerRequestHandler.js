@@ -172,7 +172,7 @@ async function registerRequest(setOfData){
     sendPacket(
         'create_account', 
         email,
-        password,
+        encryptPass,
         studentName,
         persona1,
         persona2,

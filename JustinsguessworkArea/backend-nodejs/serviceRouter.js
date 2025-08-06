@@ -5,32 +5,28 @@ async function handleServiceRequest(serviceData) {
 
     if (service === 'create_account') {
         const {
-            studentId,
-            firstName,
-            lastName,
             email,
             password,
+            studentName,
             persona1,
             persona2,
             persona3,
             persona4,
             selectedDegreeNo,
-            degreeSetString,
+            degreePercentSet,
             timekey
         } = payload;
         const postdata ={
             encryptedField:password,
             timekey,
-            studentId,
-            firstName,
-            lastName,
+            studentName,
             studendEmail:email,
             persona1,
             persona2,
             persona3,
             persona4,
             selectedDegreeNo,
-            degreeSetString
+            degreePercentSet
         };
         try{
             await axios.post('http://localhost:3306/register', postdata);
