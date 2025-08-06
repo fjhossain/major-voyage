@@ -10,6 +10,7 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 -- -----------------------------------------------------
 -- Schema csi_4999projectset
 -- -----------------------------------------------------
+DROP SCHEMA IF EXISTS `csi_4999projectset` ;
 
 -- -----------------------------------------------------
 -- Schema csi_4999projectset
@@ -29,14 +30,7 @@ CREATE TABLE IF NOT EXISTS `csi_4999projectset`.`degree` (
   `PERSONA_3_PREF` TINYINT NULL DEFAULT NULL,
   `PERSONA_4_PREF` TINYINT NULL DEFAULT NULL,
   `DEGREE_NAME` VARCHAR(45) NOT NULL,
-  `degree_DEGREE_NO` INT NOT NULL,
-  PRIMARY KEY (`DEGREE_NO`),
-  INDEX `fk_degree_degree1_idx` (`degree_DEGREE_NO` ASC) VISIBLE,
-  CONSTRAINT `fk_degree_degree1`
-    FOREIGN KEY (`degree_DEGREE_NO`)
-    REFERENCES `csi_4999projectset`.`degree` (`DEGREE_NO`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+  PRIMARY KEY (`DEGREE_NO`))
 ENGINE = InnoDB
 AUTO_INCREMENT = 5
 DEFAULT CHARACTER SET = utf8mb4
@@ -102,3 +96,18 @@ COLLATE = utf8mb4_0900_ai_ci;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+-- -----------------------------------------------------
+-- Data for table `csi_4999projectset`.`degree`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `csi_4999projectset`;
+INSERT INTO `csi_4999projectset`.`degree` (`DEGREE_NO`, `PERSONA_1_PREF`, `PERSONA_2_PREF`, `PERSONA_3_PREF`, `PERSONA_4_PREF`, `DEGREE_NAME`) VALUES (0, NULL, NULL, NULL, NULL, 'Undecided');
+INSERT INTO `csi_4999projectset`.`degree` (`DEGREE_NO`, `PERSONA_1_PREF`, `PERSONA_2_PREF`, `PERSONA_3_PREF`, `PERSONA_4_PREF`, `DEGREE_NAME`) VALUES (1, NULL, NULL, NULL, NULL, 'Arts');
+INSERT INTO `csi_4999projectset`.`degree` (`DEGREE_NO`, `PERSONA_1_PREF`, `PERSONA_2_PREF`, `PERSONA_3_PREF`, `PERSONA_4_PREF`, `DEGREE_NAME`) VALUES (2, NULL, NULL, NULL, NULL, 'Business');
+INSERT INTO `csi_4999projectset`.`degree` (`DEGREE_NO`, `PERSONA_1_PREF`, `PERSONA_2_PREF`, `PERSONA_3_PREF`, `PERSONA_4_PREF`, `DEGREE_NAME`) VALUES (3, NULL, NULL, NULL, NULL, 'Management');
+INSERT INTO `csi_4999projectset`.`degree` (`DEGREE_NO`, `PERSONA_1_PREF`, `PERSONA_2_PREF`, `PERSONA_3_PREF`, `PERSONA_4_PREF`, `DEGREE_NAME`) VALUES (4, NULL, NULL, NULL, NULL, 'Hospitality');
+INSERT INTO `csi_4999projectset`.`degree` (`DEGREE_NO`, `PERSONA_1_PREF`, `PERSONA_2_PREF`, `PERSONA_3_PREF`, `PERSONA_4_PREF`, `DEGREE_NAME`) VALUES (6, NULL, NULL, NULL, NULL, 'Information_tech');
+
+COMMIT;
+

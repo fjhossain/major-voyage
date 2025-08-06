@@ -138,10 +138,10 @@ async function registerRequest(setOfData){
                 email = dataItem;
                 break;
             case 1:
-                password = dataItem;
+                studentName = dataItem;
                 break;
             case 2:
-                studentName = dataItem;
+                password = dataItem;
                 break;
             case 3:
                 persona1 = dataItem;
@@ -284,55 +284,45 @@ async function update(setOfData) {
     const {
         email,
         password,
-        studentId,
-        firstName,
-        lastName,
+        studentName,
         persona1,
         persona2,
         persona3,
         persona4,
         selectedDegreeNo,
-        degreePercentString
     } = null;
     selectedDegreeNo = 0;
     firstname = 'John';
     lastName = 'Doe';
+    degreePercentSet = [];
     setOfData.forEach(dataItem => {
         switch (iteration) {
             case 0:
                 email = dataItem;
                 break;
             case 1:
-                password = dataItem;
+                studentName = dataItem;
                 break;
             case 2:
-                studentId = dataItem;
+                password = dataItem;
                 break;
             case 3:
-                firstName = dataItem;
-                break;
-            case 4:
-                lastName = dataItem;
-                break;
-            case 5:
                 persona1 = dataItem;
                 break;
-            case 6:
+            case 4:
                 persona2 = dataItem;
                 break;
-            case 7:
+            case 5:
                 persona3 = dataItem;
                 break;
-            case 8:
+            case 6:
                 persona4 = dataItem;
                 break;
-            case 9:
+            case 7:
                 selectedDegreeNo = dataItem;
                 break;
-            case 10:
-                degreePercentString += (dataItem.toString + " ");
-                break;
             default:
+                degreePercentSet.push(dataItem);
                 break;
             
         }

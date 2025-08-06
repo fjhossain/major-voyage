@@ -92,23 +92,32 @@ function getScoresBasedOnStudentNo(studentID){
 
 }
 /*
+table 'students':
 STUDENT_NO, 
 STUDENT_EMAIL, 
 STUDENT_USERNAME, 
 PASSWORD_ENCRYPT, 
-PERSONA_TEST_1,
+PERSONA_TEST_1, 
 PERSONA_TEST_2, 
 PERSONA_TEST_3, 
 PERSONA_TEST_4, 
 STUDENT_CREATION_TIME, 
 DEGREE_LINK_NO
-*/
-/*
+table 'degree':
+DEGREE_NO, 
+PERSONA_1_PREF, 
+PERSONA_2_PREF, 
+PERSONA_3_PREF, 
+PERSONA_4_PREF, 
+DEGREE_NAME, 
+degree_DEGREE_NO
+table 'carrerscores':
 SCORE_SET_NO, 
 SCORE_PERCENT, 
 degree_DEGREE_NO, 
 students_STUDENT_NO
 */
+
 app.post('/login', (req, res) => {
     const{userEmail, encryptedField, timekey} = req.body;
     const now = Date.now();
@@ -128,7 +137,7 @@ app.post('/login', (req, res) => {
         const query = 'SELECT * FROM students '+
         'WHERE STUDENT_EMAIL = ?';
 
-        db.query(query, userEmail,  results)
+        db.query(query, userEmail,  (err, result, queryReturn))
         if (err || results.length === 0) {
             return sendEncryptedError(
                 res, 
@@ -152,7 +161,6 @@ app.post('/login', (req, res) => {
             status: 'success',
             studentId: user.studentId,
             userName: user.STUDENT_USERNAME,
-            lastname: user.STUDENT_LNAME,
             personalityScores: [
                 user.PERSONA_TEST_1,
                 user.PERSONA_TEST_2,
