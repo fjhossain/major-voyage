@@ -174,6 +174,7 @@ app.post('/register', async (req, res) => {
             const response = {
                 status: 'success',
                 message: 'student created successfully',
+                content: 0,
                 timestamp: input.studentEmail.toString + 
                 "INSERT INTO FABLE f"
             };

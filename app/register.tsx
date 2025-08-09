@@ -1,6 +1,7 @@
+import { registerRequest } from "@/JustinsguessworkArea/backend-expogo/ServerRequestHandler";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -12,25 +13,88 @@ import {
 } from "react-native";
 
 export default function RegisterScreen() {
+  /*
+setOfData contains(in this order){
+    STUDENT_EMAIL, 
+    STUDENT_USERNAME, 
+    PASSWORD_ENCRYPT, 
+    persona1,
+    persona2,
+    persona3,
+    persona4,
+    selectedDegreeNo, this can be set as a null variable, will handle as 0 which is the undecided var
+    numbers related to degree percents(starting at 0 ending in the last degree)
+}
+the set of degrees currently is:
+1: arts
+2: business
+3: Management
+4: hospitiality
+5: undecided
+6: informantion tech
+*/
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
-
-  const handleRegister = () => {
+  var inputs = [
+    false, //persona1
+    false, //persona2
+    false, //persona3
+    false, //persona4
+    0, //selectedDegreeNo
+    [
+      0, //arts
+      0, //business
+      0, //Management
+      0, //hospitiality
+      0, //undecided
+      0, //informantion tech
+    ] //numbers related to degree percents(starting at 0 ending in the last degree)
+  ]
+  interface inputs{
+    STUDENT_EMAIL:string, 
+    STUDENT_USERNAME:string, 
+    PASSWORD_ENCRYPT:string, 
+    persona1:boolean,
+    persona2:boolean,
+    persona3:boolean,
+    persona4:boolean,
+    selectedDegreeNo:[],
+  }
+  const handleRegister = (
+    STUDENT_EMAIL:string, 
+    STUDENT_USERNAME:string, 
+    PASSWORD_ENCRYPT:string, 
+    persona1:boolean,
+    persona2:boolean,
+    persona3:boolean,
+    persona4:boolean,
+    selectedDegreeNo:boolean,
+    listinputs:[]
+  ) => {
+    var torecieve
     if (!name || !email || !password) {
       Alert.alert("Error", "Please fill in all fields.");
       return;
+    }else {
+      torecieve = await registerRequest(STUDENT_EMAIL, STUDENT_USERNAME, PASSWORD_ENCRYPT,  persona1, persona2, persona3, persona4, selectedDegreeNo, listinputs)
     }
-
+    if (!torecieve) {
+      alert('register failed')
+    }
     Alert.alert(
       "Account Created",
       "Your account has been successfully registered!"
     );
-
     setTimeout(() => {
       router.push("/login");
     }, 1000);
+  }
+
+
+    
   };
 
   return (
@@ -88,7 +152,7 @@ export default function RegisterScreen() {
         />
       </LinearGradient>
 
-      <TouchableOpacity style={styles.button} onPress={handleRegister}>
+      <TouchableOpacity style={styles.button} onPress={handleRegister()}>
         <Text style={styles.buttonText}>Register</Text>
       </TouchableOpacity>
 

@@ -72,9 +72,13 @@ async function sendPacket(serviceToRequest, data) {
         });
 
         const result = await response.JSON();
-        console.log('Server Response:', result);
+        var resultDecrypt = decryptData(result.content,"INSERT INTO FABLE f",result.iv);
+        console.log('Server Response:', resultDecrypt);
+        resultNonjsoned = JSON.parse(resultDecrypt);
+        return (0 == resultNonjsoned.content);
     } catch(error) {
         console.error('failed to send data ', error);
+        return false
     }
 }
 /*
@@ -130,8 +134,7 @@ async function registerRequest(setOfData){
     } = null;
     const degreePercentSet = []
     selectedDegreeNo = 0;
-    firstname = 'John';
-    lastName = 'Doe';
+    studentName = 'John Doe';
     setOfData.forEach(dataItem => {
         switch (iteration) {
             case 0:
@@ -169,7 +172,7 @@ async function registerRequest(setOfData){
         input.studentEmail.toString + 
         "INSERT INTO LABLE f"
     );
-    sendPacket(
+    return sendPacket(
         'create_account', 
         email,
         encryptPass,
@@ -182,7 +185,7 @@ async function registerRequest(setOfData){
         degreePercentSet,
         Date.now()        
     );
-
+    
 }
 
 async function loginrequest(email, password) {
@@ -345,7 +348,7 @@ async function update(setOfData) {
         input.studentEmail.toString + 
         "INSERT INTO LABLE f"
     );
-    sendPacket(
+    return sendPacket(
         'Update', 
         email,
         encryptPass,
