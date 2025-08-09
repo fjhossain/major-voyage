@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { Alert, Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 const personalityData: Record<
   string,
@@ -139,7 +139,7 @@ export default function ResultScreen() {
       const route = majorRouteMap[key as MajorKeys];
       router.push(route as unknown as Parameters<typeof router.push>[0]);
     } else {
-      alert(`No game screen found for major: ${major}`);
+      Alert.alert("Error", `No game screen found for major: ${major}`);
     }
   };
 
@@ -150,6 +150,17 @@ export default function ResultScreen() {
       start={{ x: 0.1, y: 0.1 }}
       end={{ x: 0.9, y: 0.9 }}
     >
+      {/* Profile logo top-right */}
+      <View style={styles.profileWrapper}>
+        <Pressable onPress={() => router.push("/profile")}>
+          <Image
+            source={require("../assets/images/Profile logo.png")}
+            style={styles.profileImage}
+            resizeMode="contain"
+          />
+        </Pressable>
+      </View>
+
       <Text style={styles.title}>Your Personality Type: {result}</Text>
       {data ? (
         <>
@@ -180,6 +191,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+  },
+  profileWrapper: {
+    position: "absolute",
+    top: 50,
+    right: 20,
+    zIndex: 999,
+  },
+  profileImage: {
+    marginTop: 60,
+    width: 60,
+    height: 60,
   },
   title: {
     fontSize: 26,

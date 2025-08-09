@@ -2,6 +2,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -15,6 +16,22 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+
+  const handleRegister = () => {
+    if (!name || !email || !password) {
+      Alert.alert("Error", "Please fill in all fields.");
+      return;
+    }
+
+    Alert.alert(
+      "Account Created",
+      "Your account has been successfully registered!"
+    );
+
+    setTimeout(() => {
+      router.push("/login");
+    }, 1000);
+  };
 
   return (
     <KeyboardAvoidingView
@@ -71,7 +88,7 @@ export default function RegisterScreen() {
         />
       </LinearGradient>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={handleRegister}>
         <Text style={styles.buttonText}>Register</Text>
       </TouchableOpacity>
 

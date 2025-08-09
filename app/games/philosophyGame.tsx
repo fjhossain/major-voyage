@@ -172,7 +172,10 @@ export default function PhilosophyEmojiDrag() {
   }
 
   return (
-    <LinearGradient colors={["#5f72be", "#9921e8"]} style={styles.container}>
+    <LinearGradient
+      colors={["#8194e0ff", "#c097dbff"]}
+      style={styles.container}
+    >
       <Text style={styles.question}>{challenge.question}</Text>
 
       <View style={styles.optionsContainer}>
@@ -239,7 +242,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   option: {
-    backgroundColor: "rgba(255,255,255,0.15)",
+    backgroundColor: "rgba(94, 14, 88, 0.22)",
     padding: 16,
     marginVertical: 8,
     borderRadius: 10,
@@ -258,7 +261,7 @@ const styles = StyleSheet.create({
     left: width / 2 - 30,
     width: 60,
     height: 60,
-    backgroundColor: "#fff",
+    backgroundColor: "purple",
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",

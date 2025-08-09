@@ -33,7 +33,7 @@ const options: Record<Category, Option[]> = {
   ],
 };
 
-export default function BudgetChallenge() {
+export default function gameSports() {
   const [budget, setBudget] = useState<number>(100000);
   const [selected, setSelected] = useState<Record<Category, Option | null>>({
     training: null,
