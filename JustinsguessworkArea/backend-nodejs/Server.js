@@ -4,7 +4,6 @@ const cors = require('cors')
 const handlePacket  = require('../backend-nodejs/serviceRouter')
 const app = express();
 const PORT = 3306;
-const express = require('express');
 const bodyParser = require('body-parser');
 
 app.use(cors());
@@ -49,7 +48,4 @@ app.post('/packet', (req, res) => {
 app.listen(PORT, () => {
     const awake = true;
     console.log('server running at http://localhost!{PORT}');
-    while(awake){
-        scripttorun;
-    }
 })
