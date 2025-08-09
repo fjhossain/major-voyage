@@ -1,26 +1,46 @@
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
   Image,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
-import { loginrequest } from '\\JustinsguessworkArea\backend-expogo\ServerRequestHandler.js';
+import { loginrequest } from "../JustinsguessworkArea/backend-expogo/ServerRequestHandler";
+
 export default function LoginScreen() {
   const router = useRouter();
-
-  const handleLogin = (username:String, password:String) => {
+  /* 
+  studentId:new_studentId,
+  email:email,
+  password:password,
+                username:new_userName,
+                persona1:new_persona1,
+                persona2:new_persona2,
+                persona3:new_persona3,
+                persona4:new_persona4,
+                selectedDegreeNo:new_selectedDegreeNo,
+                degreePercentString:new_degreePercentString
+  */
+  interface UserInfo {
+  studentId: string;
+  email: string;
+  username: string;
+  password: string;
+  persona1: string;
+  persona2: string;
+  persona3: string;
+  persona4: string;
+  selectedDegreeNo: number;
+  degreePercentString: [];
+}
+  const handleLogin = (username:string, password:string) => {
     try {
       var userInfo = null;
       userInfo = loginrequest(username, password);
-      if (userInfo) {
-        // You can store userInfo in context or async storage if needed
-        router.push("/personality");
-      } else {
-        alert("Login failed /n Invalid username or password.");
-      }
+      router.push("/personality");
     } catch (error) {
       alert("Error \n Something went wrong during login.");
       console.error(error);
@@ -105,7 +125,5 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
 });
-function useState(arg0: string): [any, any] {
-  throw new Error("Function not implemented.");
-}
+
 

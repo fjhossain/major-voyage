@@ -82,7 +82,7 @@ function getScoresBasedOnStudentNo(studentID){
       `;
         var scoreResults
         db.query(scoreQuery, [studentID],  scoreResults) 
-        if (scoreResults.length() >= 1) {
+        if (!(scoreResults.length() >= 1)) {
                 log.error('failed to retrieve scores');
                 scoreResults = getScoresBasedOnStudentNo(studentID);
                 return scoreResults

@@ -243,19 +243,21 @@ async function loginrequest(email, password) {
                 timestamp: now
             };*/
             /*
-            studentId,
-            firstName,
-            lastName,
-            persona1,
-            persona2,
-            persona3,
-            persona4,
-            selectedDegreeNo,
-            degreePercentString*/
+            status: 'success',
+            studentId: user.studentId,
+            userName: user.STUDENT_USERNAME,
+            personalityScores: [
+                user.PERSONA_TEST_1,
+                user.PERSONA_TEST_2,
+                user.PERSONA_TEST_3,
+                user.PERSONA_TEST_4
+            ],
+            selectedDegree: user.SELECTED_DEGREE_NO,
+            degreeScores: results,
+            timestamp: now */
             }
             const new_studentId = decryptData.content.studentId;
-            const new_firstName = decryptData.content.firstName;
-            const new_lastName = decryptData.content.lastname;
+            const new_userName = decryptData.content.userName;
             const new_persona1 = decryptData.content.personalityScores[0];
             const new_persona2 = decryptData.content.personalityScores[0];
             const new_persona3 = decryptData.content.personalityScores[0];
@@ -265,8 +267,9 @@ async function loginrequest(email, password) {
             
             return {
                 studentId:new_studentId,
-                firstName:new_firstName,
-                lastName:new_lastName,
+                email:email,
+                password:password,
+                username:new_userName,
                 persona1:new_persona1,
                 persona2:new_persona2,
                 persona3:new_persona3,
@@ -355,9 +358,10 @@ async function update(setOfData) {
         degreePercentSet,
         Date.now()      
     );
-    module.exports = {
-    loginrequest,
-    registerRequest,
-    update,
-};
+    
 }
+module.exports = registerRequest
+module.exports = loginrequest
+module.exports = update
+export { loginrequest, registerRequest, update };
+
