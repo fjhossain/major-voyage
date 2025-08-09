@@ -1,5 +1,4 @@
 import { useRouter } from "expo-router";
-import React from "react";
 import {
   Image,
   StyleSheet,
@@ -8,18 +7,32 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
+import { loginrequest } from '\\JustinsguessworkArea\backend-expogo\ServerRequestHandler.js';
 export default function LoginScreen() {
   const router = useRouter();
 
-  const handleLogin = () => {
+  const handleLogin = (username:String, password:String) => {
+    try {
+      var userInfo = null;
+      userInfo = loginrequest(username, password);
+      if (userInfo) {
+        // You can store userInfo in context or async storage if needed
+        router.push("/personality");
+      } else {
+        alert("Login failed /n Invalid username or password.");
+      }
+    } catch (error) {
+      alert("Error \n Something went wrong during login.");
+      console.error(error);
+    }
     router.push("/personality");
   };
 
   const goToRegister = () => {
     router.push("/register");
   };
-
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   return (
     <View style={styles.container}>
       <Image
@@ -27,9 +40,9 @@ export default function LoginScreen() {
         style={styles.logo}
       />
       <Text style={styles.title}>Login</Text>
-      <TextInput style={styles.input} placeholder="Username" />
-      <TextInput style={styles.input} placeholder="Password" secureTextEntry />
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+      <TextInput style={styles.input} placeholder="Username" value={username} onChangeText={setUsername} />
+      <TextInput style={styles.input} placeholder="Password" secureTextEntry value={Password} onChangeText={setPassword} />
+      <TouchableOpacity style={styles.button} onPress={handleLogin(username,password)}>
         <Text style={styles.buttonText}>Log In</Text>
       </TouchableOpacity>
 
@@ -92,3 +105,7 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
 });
+function useState(arg0: string): [any, any] {
+  throw new Error("Function not implemented.");
+}
+

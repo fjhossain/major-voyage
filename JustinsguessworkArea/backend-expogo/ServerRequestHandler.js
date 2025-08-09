@@ -355,5 +355,9 @@ async function update(setOfData) {
         degreePercentSet,
         Date.now()      
     );
-
+    module.exports = {
+    loginrequest,
+    registerRequest,
+    update,
+};
 }
