@@ -63,7 +63,7 @@ export default function LoginScreen() {
       />
       <Text style={styles.title}>Login</Text>
       <TextInput style={styles.input} placeholder="Username" value={username} onChangeText={setUsername} />
-      <TextInput style={styles.input} placeholder="Password" secureTextEntry value={Password} onChangeText={setPassword} />
+      <TextInput style={styles.input} placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} />
       <TouchableOpacity style={styles.button} onPress={handleLogin(username,password)}>
         <Text style={styles.buttonText}>Log In</Text>
       </TouchableOpacity>
