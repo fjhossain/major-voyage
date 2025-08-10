@@ -1,4 +1,3 @@
-import { registerRequest } from "@/JustinsguessworkArea/backend-expogo/ServerRequestHandler";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -11,9 +10,8 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-
-export default function RegisterScreen() {
-  /*
+import * as wierdscript from "../JustinsguessworkArea/backend-expogo/ServerRequestHandler";
+/*
 setOfData contains(in this order){
     STUDENT_EMAIL, 
     STUDENT_USERNAME, 
@@ -33,11 +31,7 @@ the set of degrees currently is:
 5: undecided
 6: informantion tech
 */
-
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const router = useRouter();
+/*
   var inputs = [
     false, //persona1
     false, //persona2
@@ -52,50 +46,59 @@ the set of degrees currently is:
       0, //undecided
       0, //informantion tech
     ] //numbers related to degree percents(starting at 0 ending in the last degree)
-  ]
-  interface inputs{
-    STUDENT_EMAIL:string, 
-    STUDENT_USERNAME:string, 
-    PASSWORD_ENCRYPT:string, 
-    persona1:boolean,
-    persona2:boolean,
-    persona3:boolean,
-    persona4:boolean,
-    selectedDegreeNo:[],
-  }
-  const handleRegister = (
-    STUDENT_EMAIL:string, 
-    STUDENT_USERNAME:string, 
-    PASSWORD_ENCRYPT:string, 
-    persona1:boolean,
-    persona2:boolean,
-    persona3:boolean,
-    persona4:boolean,
-    selectedDegreeNo:boolean,
-    listinputs:[]
-  ) => {
-    var torecieve
-    if (!name || !email || !password) {
+  ]*/
+export default function RegisterScreen() {
+  const router = useRouter();
+
+  // Form state
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  // Persona and degree data
+  const [personas, setPersonas] = useState([false, false, false, false]);
+  const [selectedDegreeNo, setSelectedDegreeNo] = useState(0); // 0 = undecided
+  const [degreePercents, setDegreePercents] = useState([0, 0, 0, 0, 0, 0]);
+
+  const handleRegister = async () => {
+    if (!username || !email || !password) {
       Alert.alert("Error", "Please fill in all fields.");
       return;
-    }else {
-      torecieve = registerRequest(STUDENT_EMAIL, STUDENT_USERNAME, PASSWORD_ENCRYPT,  persona1, persona2, persona3, persona4, selectedDegreeNo, listinputs)
     }
-    if (!torecieve) {
-      alert('register failed')
+    try {
+      const result = await wierdscript.registerRequest(
+        email,
+        username,
+        password,
+        personas[0],
+        personas[1],
+        personas[2],
+        personas[3],
+        selectedDegreeNo,
+        [
+          degreePercents[0],
+          degreePercents[1],
+          degreePercents[2],
+          degreePercents[3],
+          degreePercents[4],
+          degreePercents[5]
+        ]
+      );
+
+      if (!result) {
+        Alert.alert("Error", "Registration failed. Please try again.");
+        return;
+      }
+
+      Alert.alert("Account Created", "Your account has been successfully registered!");
+      setTimeout(() => {
+        router.push("/login");
+      }, 1000);
+    } catch (error) {
+      console.error("Registration error:", error);
+      Alert.alert("Error", "An unexpected error occurred.");
     }
-    Alert.alert(
-      "Account Created",
-      "Your account has been successfully registered!"
-    );
-    setTimeout(() => {
-      router.push("/login");
-    }, 1000);
-  }
-
-
-    
-  
+  };
 
   return (
     <KeyboardAvoidingView
@@ -104,55 +107,26 @@ the set of degrees currently is:
     >
       <Text style={styles.title}>Create Account</Text>
 
-      <LinearGradient
-        colors={["#7F00FF", "#2196F3"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.gradientBorder}
-      >
-        <TextInput
-          style={styles.input}
-          placeholder="User Name"
-          placeholderTextColor="#888"
-          value={name}
-          onChangeText={setName}
-        />
-      </LinearGradient>
+      <GradientInput
+        placeholder="User Name"
+        value={username}
+        onChangeText={setUsername}
+      />
+      <GradientInput
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      <GradientInput
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
 
-      <LinearGradient
-        colors={["#7F00FF", "#2196F3"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.gradientBorder}
-      >
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#888"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-      </LinearGradient>
-
-      <LinearGradient
-        colors={["#7F00FF", "#2196F3"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.gradientBorder}
-      >
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#888"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-      </LinearGradient>
-
-      <TouchableOpacity style={styles.button} onPress={handleRegister()}>
+      <TouchableOpacity style={styles.button} onPress={handleRegister}>
         <Text style={styles.buttonText}>Register</Text>
       </TouchableOpacity>
 
@@ -162,6 +136,24 @@ the set of degrees currently is:
         </Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
+  );
+}
+
+// 🧩 Reusable gradient input component
+function GradientInput(props: any) {
+  return (
+    <LinearGradient
+      colors={["#7F00FF", "#2196F3"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+      style={styles.gradientBorder}
+    >
+      <TextInput
+        style={styles.input}
+        placeholderTextColor="#888"
+        {...props}
+      />
+    </LinearGradient>
   );
 }
 

@@ -120,9 +120,9 @@ setOfData contains(in this order){
     numbers related to degree percents(starting at 0 ending in the last degree)
 }
 */
-async function registerRequest(setOfData){
+export function registerRequest(setOfData){
     var iteration = 0;
-    const {
+    let {
         email,
         password,
         studentName,
@@ -132,7 +132,7 @@ async function registerRequest(setOfData){
         persona4,
         selectedDegreeNo,
     } = null;
-    const degreePercentSet = []
+    let degreePercentSet = []
     selectedDegreeNo = 0;
     studentName = 'John Doe';
     setOfData.forEach(dataItem => {
@@ -187,10 +187,9 @@ async function registerRequest(setOfData){
     );
     
 }
-
-async function loginrequest(email, password) {
+export async function loginrequest(email, password) {
     const timeKey = Date.now().toString();
-    const encryptedPassword = await encryptPass(password, timeKey);
+    const encryptedPassword =encryptPass(password, timeKey);
 
     const payload = {
         service: 'login',
@@ -294,7 +293,7 @@ the set of degrees currently is:
 5: undecided
 6: informantion tech
 */
-async function update(setOfData) {
+export async function update(setOfData) {
     var iteration = 0;
     const {
         email,
@@ -363,8 +362,4 @@ async function update(setOfData) {
     );
     
 }
-module.exports = registerRequest
-module.exports = loginrequest
-module.exports = update
-export { loginrequest, registerRequest, update };
 

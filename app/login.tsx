@@ -12,49 +12,23 @@ import { loginrequest } from "../JustinsguessworkArea/backend-expogo/ServerReque
 
 export default function LoginScreen() {
   const router = useRouter();
-  /* 
-  studentId:new_studentId,
-  email:email,
-  password:password,
-                username:new_userName,
-                persona1:new_persona1,
-                persona2:new_persona2,
-                persona3:new_persona3,
-                persona4:new_persona4,
-                selectedDegreeNo:new_selectedDegreeNo,
-                degreePercentString:new_degreePercentString
-  */
-  interface UserInfo {
-  studentId: string;
-  email: string;
-  username: string;
-  password: string;
-  persona1: string;
-  persona2: string;
-  persona3: string;
-  persona4: string;
-  selectedDegreeNo: number;
-  degreePercentString: [];
-}
-  const handleLogin = (username:string, password:string) => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  async function handleLoginNow() {
     try {
-      var userInfo = null;
-      userInfo = loginrequest(username, password);
-      
-        // You can store userInfo in context or async storage if needed
-        router.push("/personality");
+      const userInfo = await loginrequest(username, password);
+      router.push("/personality");
     } catch (error) {
       alert("Error \n Something went wrong during login.");
       console.error(error);
     }
-    router.push("/personality");
-  };
+  }
 
   const goToRegister = () => {
     router.push("/register");
   };
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+
   return (
     <View style={styles.container}>
       <Image
@@ -62,9 +36,20 @@ export default function LoginScreen() {
         style={styles.logo}
       />
       <Text style={styles.title}>Login</Text>
-      <TextInput style={styles.input} placeholder="Username" value={username} onChangeText={setUsername} />
-      <TextInput style={styles.input} placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} />
-      <TouchableOpacity style={styles.button} onPress={handleLogin(username,password)}>
+      <TextInput
+        style={styles.input}
+        placeholder="Username"
+        value={username}
+        onChangeText={setUsername}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
+      <TouchableOpacity style={styles.button} onPress={handleLoginNow}>
         <Text style={styles.buttonText}>Log In</Text>
       </TouchableOpacity>
 
@@ -127,5 +112,4 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
 });
-
 
