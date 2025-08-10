@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
+import FeedbackScreen from "./FeedbackScreen";
 
 type Category = "training" | "equipment" | "marketing";
 
@@ -42,15 +43,6 @@ const levelOptions: LevelOptions[] = [
       { label: "Influencer Blitz ($40K)", cost: 40, impact: 7 },
       { label: "Global Deal ($60K)", cost: 60, impact: 9 },
     ],
-  },
-  {
-    training: [
-      { label: "Olympic-Level Bootcamp ($80K)", cost: 80, impact: 10 },
-    ],
-    equipment: [
-      { label: "Neural Performance Gear ($80K)", cost: 80, impact: 10 },
-    ],
-    marketing: [{ label: "Metaverse Branding ($80K)", cost: 80, impact: 10 }],
   },
 ];
 
@@ -106,18 +98,14 @@ export default function SportsAdminGame() {
   if (showResult) {
     const passed = totalScore >= totalMaxImpact * 0.7;
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Game Over</Text>
-        <Text style={styles.result}>
-          Your Total Score: {totalScore} / {totalMaxImpact}
-        </Text>
-        <Text style={[styles.result, { color: passed ? "green" : "red" }]}>
-          {passed ? "You Passed!" : "You Failed!"}
-        </Text>
-        <Pressable onPress={handleRestart} style={styles.button}>
-          <Text style={styles.buttonText}>Restart</Text>
-        </Pressable>
-      </View>
+      <FeedbackScreen
+        totalScore={totalScore}
+        totalMaxImpact={totalMaxImpact}
+        passed={passed}
+        major="Sports Management"
+        personality="ESTP"
+        onRestart={handleRestart}
+      />
     );
   }
 
@@ -195,10 +183,5 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
-  },
-  result: {
-    fontSize: 20,
-    marginVertical: 10,
-    textAlign: "center",
   },
 });

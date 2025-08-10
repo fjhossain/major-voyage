@@ -146,7 +146,7 @@ export default function GameBusiness() {
             text: "See Feedback",
             onPress: () =>
               router.push(
-                `/result/final?score=${finalScore}&major=Business Administration`
+                `/FeedbackBusiness?score=${finalScore}&major=Business Administration&personality=ESTP`
               ),
           },
         ]
