@@ -40,7 +40,9 @@ export default function LoginScreen() {
     try {
       var userInfo = null;
       userInfo = loginrequest(username, password);
-      router.push("/personality");
+      
+        // You can store userInfo in context or async storage if needed
+        router.push("/personality");
     } catch (error) {
       alert("Error \n Something went wrong during login.");
       console.error(error);
