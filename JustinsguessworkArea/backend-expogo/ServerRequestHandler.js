@@ -1,4 +1,4 @@
-import * as crypto from 'expo-crypto';
+import * as crypto from 'crypto';
 
 const algorithm = 'aes=256-cbc';
 
@@ -16,11 +16,17 @@ function decryptData(encrypted, timekey, iv) {
 }
 
 function encryptData(data, timestamp) {
-    const key = deriveKey(timestamp.toString());
+    console.log('19');
+    const key = crypto.deriveKey(timestamp.toString());
+    console.log('21');    
     const iv = crypto.randomBytes(16);
+    console.log('23')
     const cipher = crypto.createCipheriv(algorithm,key,iv);
+     console.log('25'); 
     let encrypted = cipher.update(data, 'utf8', 'hex');
+     console.log('27'); 
     encrypted += cipher.final('hex');
+     console.log('21'); 
     return {
         iv:iv.toString('hex'),
         content: encrypted
@@ -121,57 +127,35 @@ setOfData contains(in this order){
 }
 */
 export function registerRequest(setOfData){
-    var iteration = 0;
-    let {
-        email,
-        password,
-        studentName,
-        persona1,
-        persona2,
-        persona3,
-        persona4,
-        selectedDegreeNo,
-    } = null;
-    let degreePercentSet = []
-    selectedDegreeNo = 0;
+    console.log(setOfData.toString());
+    console.log('125');
+    
+    
+    var email = setOfData[0]
+    var password = setOfData[1]
+    var    studentName = setOfData[2]
+    var   persona1 = setOfData[3]
+    var    persona2 = setOfData[4]
+    var    persona3 = setOfData[5]
+    var persona4 = setOfData[6]
+    var selectedDegreeNo = setOfData[7]
+    var degreePercentSet =setOfData[8]
+    console.log(email);
+    console.log('138');
+    if (selectedDegreeNo=== null){selectedDegreeNo = 0;}
+    console.log('140');
+    if(studentName===null){studentName='johndoe'}
+    console.log('142');
+    if(email===null){email='johndoe'}
     studentName = 'John Doe';
-    setOfData.forEach(dataItem => {
-        switch (iteration) {
-            case 0:
-                email = dataItem;
-                break;
-            case 1:
-                studentName = dataItem;
-                break;
-            case 2:
-                password = dataItem;
-                break;
-            case 3:
-                persona1 = dataItem;
-                break;
-            case 4:
-                persona2 = dataItem;
-                break;
-            case 5:
-                persona3 = dataItem;
-                break;
-            case 6:
-                persona4 = dataItem;
-                break;
-            case 7:
-                selectedDegreeNo = dataItem;
-                break;
-            default:
-                degreePercentSet.push(dataItem);
-                break;
-            
-        }
-    });
+    console.log('145');
+
     const encryptedPass = encryptPass(
         password, 
-        input.studentEmail.toString + 
+        email.toString() + 
         "INSERT INTO LABLE f"
     );
+    console.log('152');
     return sendPacket(
         'create_account', 
         email,

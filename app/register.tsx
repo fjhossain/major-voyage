@@ -61,12 +61,14 @@ export default function RegisterScreen() {
   const [degreePercents, setDegreePercents] = useState([0, 0, 0, 0, 0, 0]);
 
   const handleRegister = async () => {
+    
+
     if (!username || !email || !password) {
       Alert.alert("Error", "Please fill in all fields.");
       return;
     }
     try {
-      const result = await wierdscript.registerRequest(
+      const result = await wierdscript.registerRequest([
         email,
         username,
         password,
@@ -82,7 +84,7 @@ export default function RegisterScreen() {
           degreePercents[3],
           degreePercents[4],
           degreePercents[5]
-        ]
+        ]]
       );
 
       if (!result) {
