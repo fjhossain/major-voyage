@@ -7,7 +7,7 @@ export function registerRequest(STUDENT_EMAIL:string,
     persona3:boolean,
     persona4:boolean,
     selectedDegreeNo:boolean,
-    listinputs:[]): Promise<number>;
+    listinputs:[]): Promise<boolean>;
 export function update(STUDENT_EMAIL:string, 
     STUDENT_USERNAME:string, 
     PASSWORD_ENCRYPT:string, 

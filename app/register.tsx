@@ -79,7 +79,7 @@ the set of degrees currently is:
       Alert.alert("Error", "Please fill in all fields.");
       return;
     }else {
-      torecieve = await registerRequest(STUDENT_EMAIL, STUDENT_USERNAME, PASSWORD_ENCRYPT,  persona1, persona2, persona3, persona4, selectedDegreeNo, listinputs)
+      torecieve = registerRequest(STUDENT_EMAIL, STUDENT_USERNAME, PASSWORD_ENCRYPT,  persona1, persona2, persona3, persona4, selectedDegreeNo, listinputs)
     }
     if (!torecieve) {
       alert('register failed')
@@ -95,7 +95,7 @@ the set of degrees currently is:
 
 
     
-  };
+  
 
   return (
     <KeyboardAvoidingView

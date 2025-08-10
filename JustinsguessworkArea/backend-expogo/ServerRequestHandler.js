@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+import * as crypto from 'expo-crypto';
 
 const algorithm = 'aes=256-cbc';
 
@@ -71,7 +71,7 @@ async function sendPacket(serviceToRequest, data) {
                 body: JSON.stringify(payload)
         });
 
-        const result = await response.JSON();
+        const result =  response.JSON();
         var resultDecrypt = decryptData(result.content,"INSERT INTO FABLE f",result.iv);
         console.log('Server Response:', resultDecrypt);
         resultNonjsoned = JSON.parse(resultDecrypt);
