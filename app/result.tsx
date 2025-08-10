@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { Alert, Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 const personalityData: Record<
   string,
@@ -88,19 +88,79 @@ const personalityData: Record<
   },
 };
 
+const normalizeMajor = (major: string) => major.trim().toLowerCase();
+
+const majorRouteMap = {
+  "computer science": "/games/compGame",
+  finance: "/games/financeGame",
+  accounting: "/games/accountingGame",
+  "criminal justice": "/games/criminalJusticeGame",
+  nursing: "/games/nursingGame",
+  "social work": "/games/socialWorkGame",
+  psychology: "/games/psychologyGame",
+  education: "/games/educationGame",
+  engineering: "/games/engineeringGame",
+  "data science": "/games/dataScienceGame",
+  "mechanical engineering": "/games/mechanicalEngineeringGame",
+  "information technology": "/games/infoTechGame",
+  "graphic design": "/games/graphicDesignGame",
+  "interior design": "/games/interiorDesignGame",
+  "creative writing": "/games/creativeWritingGame",
+  "human services": "/games/humanServicesGame",
+  philosophy: "/games/philosophyGame",
+  "business administration": "/games/gameBusiness",
+  "sports management": "/games/gameSports",
+  "performing arts": "/games/artsmajorGame",
+  "hospitality management": "/games/hospminigame",
+  marketing: "/games/marketingGame",
+  journalism: "/games/journalismGame",
+  entrepreneurship: "/games/entrepreneurshipGame",
+  "political science": "/games/politicalScienceGame",
+  management: "/games/managementGame",
+  "public administration": "/games/publicAdminGame",
+  counseling: "/games/counselingGame",
+  communications: "/games/communicationsGame",
+  law: "/games/lawGame",
+} as const;
+
+type MajorKeys = keyof typeof majorRouteMap;
+
 export default function ResultScreen() {
   const { type } = useLocalSearchParams();
   const router = useRouter();
+
   const result = typeof type === "string" ? type.toUpperCase() : "";
   const data = personalityData[result];
 
+  const handleMajorPress = (major: string) => {
+    const key = normalizeMajor(major);
+
+    if (key in majorRouteMap) {
+      const route = majorRouteMap[key as MajorKeys];
+      router.push(route as unknown as Parameters<typeof router.push>[0]);
+    } else {
+      Alert.alert("Error", `No game screen found for major: ${major}`);
+    }
+  };
+
   return (
     <LinearGradient
-      colors={["#d0e6ff", "#e0c3fc", "#f8f9fa"]}
+      colors={["#d0e6ff", "#c3b9fc", "#f8f9fa"]}
       style={styles.container}
       start={{ x: 0.1, y: 0.1 }}
       end={{ x: 0.9, y: 0.9 }}
     >
+      {/* Profile logo top-right */}
+      <View style={styles.profileWrapper}>
+        <Pressable onPress={() => router.push("/profile")}>
+          <Image
+            source={require("../assets/images/Profile logo.png")}
+            style={styles.profileImage}
+            resizeMode="contain"
+          />
+        </Pressable>
+      </View>
+
       <Text style={styles.title}>Your Personality Type: {result}</Text>
       {data ? (
         <>
@@ -110,7 +170,7 @@ export default function ResultScreen() {
             <Pressable
               key={index}
               style={styles.majorButton}
-              // onPress={() => router.push(`/game?major=${major}`)}
+              onPress={() => handleMajorPress(major)}
             >
               <Text style={styles.majorText}>{major}</Text>
             </Pressable>
@@ -131,6 +191,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+  },
+  profileWrapper: {
+    position: "absolute",
+    top: 50,
+    right: 20,
+    zIndex: 999,
+  },
+  profileImage: {
+    marginTop: 60,
+    width: 60,
+    height: 60,
   },
   title: {
     fontSize: 26,
