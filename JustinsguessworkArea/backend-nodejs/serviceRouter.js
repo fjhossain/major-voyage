@@ -1,5 +1,13 @@
 const axios = require('axios');
 
+function decryptData(encrypted, timekey) {
+    const key = deriveKey(timekey);
+    const iv = Buffer.from(encrypted.iv, 'hex');
+    const decipher = crypto.createDecipheriv(algorithm, key, iv);
+    let decrypted = decipher.update(encrypted.content, 'hex', 'utf8');
+    decrypted += decipher.final('utf8')
+    return decrypted;
+}
 async function handleServiceRequest(serviceData) {
     const { service, payload } = serviceData;
 
@@ -16,8 +24,13 @@ async function handleServiceRequest(serviceData) {
             degreePercentSet,
             timekey
         } = payload;
+        let DecryptedPasword = decryptData(
+            password, 
+            email.toString + "INSERT INTO LABLE f"
+        );
+
         const postdata ={
-            encryptedField:password,
+            encryptedField:decryptedPass,
             timekey,
             studentName,
             studendEmail:email,
@@ -36,13 +49,13 @@ async function handleServiceRequest(serviceData) {
         }
     } else if (service === 'login'){
         const { encryptedPassword, timekey, email } = payload
-
+        let decryptedPass = decryptData(encryptedPassword,timeKey);
         const loginData = {
             userEmail: email,
-            encryptedField: encryptedPassword,
+            encryptedField: decryptedPass,
             timekey
         };
-
+        
         try {
             await axios.post('http://localhost:3306/register', loginData);
             console.log('login prep successful', email);            
@@ -62,8 +75,9 @@ async function handleServiceRequest(serviceData) {
         degreePercentSet,
         timekey
         } = payload;
+        let decryptedPass = decryptData(password,timeKey);
         postdata ={
-            encryptedField:password,
+            encryptedField:decryptedPass,
             timekey,
             studentName,
             studendEmail:email,

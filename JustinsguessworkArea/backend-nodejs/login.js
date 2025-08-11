@@ -20,14 +20,7 @@ function deriveKey(secret) {
     return crypto.createHash('sha256').update(secret).digest();
 }
 
-function decryptData(encrypted, timekey) {
-    const key = deriveKey(timekey);
-    const iv = Buffer.from(encrypted.iv, 'hex');
-    const decipher = crypto.createDecipheriv(algorithm, key, iv);
-    let decrypted = decipher.update(encrypted.content, 'hex', 'utf8');
-    decrypted += decipher.final('utf8')
-    return decrypted;
-}
+
 
 function encryptData(data, timestamp) {
     const key = deriveKey(timestamp.toString());
@@ -123,7 +116,7 @@ app.post('/login', (req, res) => {
     const now = Date.now();
     
     try {
-        const decryptedPassword = decryptData(encryptedField,timeKey);
+        const decryptedPassword = password;
         const encrypted = encryptData(
             decryptedPassword, 
             crypto.createHash(

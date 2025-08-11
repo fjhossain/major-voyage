@@ -107,7 +107,7 @@ app.post('/update', async (req, res) => {
             timeKey
         }= input
    try {
-        const decryptedPassword = decryptData(encryptedField,timeKey);
+        const decryptedPassword = encryptedField;
         const encrypted = encryptData(
             decryptedPassword, 
             crypto.createHash(
@@ -188,12 +188,12 @@ app.post('/update', async (req, res) => {
         result2s.forEach(item => {
             const query = 'UPDATE INTO carrerscores (SCORE_SET_NO, SCORE_PERCENT, degree_DEGREE_NO, students_STUDENT_NO) VALUES (?, ?, ?, ?);'
             const newSCORE_PERCENT = degreePercentSet[degree_DEGREE_NO - 1];
-            const values = {
+            const values = [
                 item.SCORE_SET_NO,
                 newSCORE_PERCENT,
                 item.degree_DEGREE_NO,
                 userNo
-            }
+            ];
             db.query(query, values, (error, results, fields));
             if(err|| results.length === 0) {
                 return sendEncryptedError(
