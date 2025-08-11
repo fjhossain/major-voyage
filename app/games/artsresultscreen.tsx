@@ -1,13 +1,16 @@
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { Button, ScrollView, StyleSheet, Text } from 'react-native';
+import { Button, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function ArtsResultScreen() {
+  const router = useRouter();
+
   return (
     <LinearGradient colors={['#B57EDC', '#E6E6FA']} style={styles.gradient}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.backgroundEmojis}>
-          🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️
+          🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️🎭🎨🖌️📚🎬🎶🧠🌈🎭🎨🖌️
         </Text>
 
         <Text style={styles.title}>🎭 Arts Major: You're a Natural Fit!</Text>
@@ -27,11 +30,14 @@ export default function ArtsResultScreen() {
         <Text style={styles.benefit}>
           Research supports that matching your major with your personality type increases satisfaction and success. Studies like Goldschmid (1967) show personality traits can predict interest and performance in certain fields—ESFPs are often drawn to expressive, interactive disciplines like the arts.
         </Text>
- <Text>
-        Want to try again? Tap below:
-        
-      </Text>
-      <Button title="🔁 Play Again" onPress={() => {}} />
+
+        <View style={styles.tryAgainContainer}>
+          <Text style={styles.tryAgainText}>Want to try again? Tap below:</Text>
+          <Button
+            title="🔁 Play Again"
+            onPress={() => router.push('/personality')}
+          />
+        </View>
       </ScrollView>
     </LinearGradient>
   );
@@ -91,5 +97,15 @@ const styles = StyleSheet.create({
   },
   bold: {
     fontWeight: 'bold',
+  },
+  tryAgainContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  tryAgainText: {
+    marginBottom: 12,
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
   },
 });
