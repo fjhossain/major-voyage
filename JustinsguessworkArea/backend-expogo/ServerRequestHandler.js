@@ -1,41 +1,39 @@
-import * as crypto from 'crypto';
+import * as Crypto from 'expo-crypto';
+import AES from 'react-native-aes-crypto';
+import 'react-native-get-random-values';
+async function deriveKey(secret) {
+  const hash = await Crypto.digestStringAsync(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    secret
+  );
+  return hash; // already hex string
+}
 
+async function encryptData(data, secret) {
+  const key = await deriveKey(secret);
+  const iv = Crypto.getRandomBytes(16); // returns Uint8Array
+  const ivHex = Buffer.from(iv).toString('hex');
+
+  const encrypted = await AES.encrypt(data, key, ivHex);
+  return {
+    iv: ivHex,
+    content: encrypted
+  };
+}
+
+async function decryptData(encrypted, secret, ivHex) {
+  const key = await deriveKey(secret);
+  const decrypted = await AES.decrypt(encrypted.content, key, ivHex);
+  return decrypted;
+}
 const algorithm = 'aes=256-cbc';
 
-function deriveKey(secret) {
-    // ensure the key is 32 bytes
-    return crypto.createHash('sha256').update(secret).digest();
+
+async function encryptPass(password, email) {
+  const secret = email + "INSERT INTO TABLE f";
+  return await encryptData(password, secret);
 }
 
-function decryptData(encrypted, timekey, iv) {
-    const key = deriveKey(timekey);
-    const decipher = crypto.createDecipheriv(algorithm, key, iv);
-    let decrypted = decipher.update(encrypted.content, 'hex', 'utf8');
-    decrypted += decipher.final('utf8')
-    return decrypted;
-}
-
-function encryptData(data, timestamp) {
-    console.log('19');
-    const key = crypto.deriveKey(timestamp.toString());
-    console.log('21');    
-    const iv = crypto.randomBytes(16);
-    console.log('23')
-    const cipher = crypto.createCipheriv(algorithm,key,iv);
-     console.log('25'); 
-    let encrypted = cipher.update(data, 'utf8', 'hex');
-     console.log('27'); 
-    encrypted += cipher.final('hex');
-     console.log('21'); 
-    return {
-        iv:iv.toString('hex'),
-        content: encrypted
-    };
-}
-
-function encryptPass(password, email) {
-    return encryptData(password, email.toString() + "INSERT INTO TABLE f");
-}
 /*
 if (service === 'create_account') {
         const {
@@ -61,32 +59,40 @@ if (service === 'create_account') {
             timekey
         };
 */
-async function sendPacket(serviceToRequest, data) {
-    const payload = {
-        serviceToRequest, 
-        data
-    };
-    try {
-        //this is where we put where we are hosting it
-        const response = await fetch(
-            "nodeserverhere", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-        });
-
-        const result =  response.JSON();
-        var resultDecrypt = decryptData(result.content,"INSERT INTO FABLE f",result.iv);
-        console.log('Server Response:', resultDecrypt);
-        resultNonjsoned = JSON.parse(resultDecrypt);
-        return (0 == resultNonjsoned.content);
-    } catch(error) {
-        console.error('failed to send data ', error);
-        return false
+async function sendPacket(service, email, encryptedPass, studentName, persona1, persona2, persona3, persona4, selectedDegreeNo, degreePercentSet, timekey) {
+  const payload = {
+    service,
+    payload: {
+      email,
+      password: encryptedPass,
+      studentName,
+      persona1,
+      persona2,
+      persona3,
+      persona4,
+      selectedDegreeNo,
+      degreePercentSet,
+      timekey
     }
+  };
+
+  try {
+    const response = await fetch("http://192.168.1.42:3000", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    const decrypted = await decryptData(result, "INSERT INTO FABLE f", result.iv);
+    const parsed = JSON.parse(decrypted);
+    return parsed.content === 0;
+  } catch (error) {
+    console.error('Failed to send data:', error);
+    return false;
+  }
 }
+
 /*
 table 'students':
 STUDENT_NO, 
@@ -171,6 +177,7 @@ export function registerRequest(setOfData){
     );
     
 }
+
 export async function loginrequest(email, password) {
     const timeKey = Date.now().toString();
     const encryptedPassword =encryptPass(password, timeKey);
@@ -189,7 +196,11 @@ export async function loginrequest(email, password) {
             headers: {'Content-Type': 'applictation/json'},
             body: JSON.stringify(payload)
         });
-
+        console.log(sending.status);
+        console.log(sending.text);
+        console.log(sending.headers);
+        console.log(sending.blob)
+        
         const result = await response.json();
         if (result.error) {
             console.error("Login Failed: ", result.error);

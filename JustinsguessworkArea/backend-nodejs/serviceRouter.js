@@ -9,93 +9,62 @@ function decryptData(encrypted, timekey) {
     return decrypted;
 }
 async function handleServiceRequest(serviceData) {
-    const { service, payload } = serviceData;
+  const { service, payload } = serviceData;
 
-    if (service === 'create_account') {
-        const {
-            email,
-            password,
-            studentName,
-            persona1,
-            persona2,
-            persona3,
-            persona4,
-            selectedDegreeNo,
-            degreePercentSet,
-            timekey
-        } = payload;
-        let DecryptedPasword = decryptData(
-            password, 
-            email.toString + "INSERT INTO LABLE f"
-        );
+  const {
+    email,
+    password,
+    studentName,
+    persona1,
+    persona2,
+    persona3,
+    persona4,
+    selectedDegreeNo,
+    degreePercentSet,
+    timekey
+  } = payload;
 
-        const postdata ={
-            encryptedField:decryptedPass,
-            timekey,
-            studentName,
-            studendEmail:email,
-            persona1,
-            persona2,
-            persona3,
-            persona4,
-            selectedDegreeNo,
-            degreePercentSet
-        };
-        try{
-            await axios.post('http://localhost:3306/register', postdata);
-            console.log("account created: ", email.toString());
-        } catch (err) {
-            console.error('account creation failed: ' + email.toString() + " error: ", err.content().toString());
-        }
-    } else if (service === 'login'){
-        const { encryptedPassword, timekey, email } = payload
-        let decryptedPass = decryptData(encryptedPassword,timeKey);
-        const loginData = {
-            userEmail: email,
-            encryptedField: decryptedPass,
-            timekey
-        };
-        
-        try {
-            await axios.post('http://localhost:3306/register', loginData);
-            console.log('login prep successful', email);            
-        } catch (err) {
-            console.log('login prep failed on: ' + email.toString() + " error: ", err.message);
-        }
-    }else if (service === 'update'){
-        const {
-            email,
-        password,
-        studentName,
-        persona1,
-        persona2,
-        persona3,
-        persona4,
-        selectedDegreeNo,
-        degreePercentSet,
-        timekey
-        } = payload;
-        let decryptedPass = decryptData(password,timeKey);
-        postdata ={
-            encryptedField:decryptedPass,
-            timekey,
-            studentName,
-            studendEmail:email,
-            persona1,
-            persona2,
-            persona3,
-            persona4,
-            selectedDegreeNo,
-            degreePercentSet
-        };
-        try {
-            await axios.post('http://localhost:3306/update', postdata);
-            console.log("account created: ", email.toString());
-        } catch (error) {
-            
-        }
-    } else {
-        console.log('Unsupported service type: ', service);
-    }
+  const secret = email + "INSERT INTO TABLE f";
+  let decryptedPass;
+
+  try {
+    decryptedPass = decryptData(password, secret);
+  } catch (err) {
+    console.error(`Decryption failed for ${email}:`, err.message);
+    return;
+  }
+
+  const postdata = {
+    encryptedField: decryptedPass,
+    timekey,
+    studentName,
+    studentEmail: email,
+    persona1,
+    persona2,
+    persona3,
+    persona4,
+    selectedDegreeNo,
+    degreePercentSet
+  };
+
+  let endpoint;
+  if (service === 'create_account') {
+    endpoint = 'http://localhost:3000/register';
+  } else if (service === 'update') {
+    endpoint = 'http://localhost:3000/update';
+  } else if (service === 'login') {
+    endpoint = 'http://localhost:3000/login';
+  } else {
+    console.log('Unsupported service type:', service);
+    return;
+  }
+
+  try {
+    await axios.post(endpoint, postdata);
+    console.log(`${service} successful for:`, email);
+  } catch (err) {
+    console.error(`${service} failed for ${email}:`, err.message);
+  }
 }
+
 module.exports = { handleServiceRequest };

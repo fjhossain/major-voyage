@@ -175,7 +175,7 @@ app.post('/register', async (req, res) => {
                 "INSERT INTO FABLE f"
             );
             
-
+            console.log(JSON.stringify(response));
             res.json({
                 success: true,
                 timestamp: now,
