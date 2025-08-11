@@ -77,7 +77,7 @@ async function sendPacket(service, email, encryptedPass, studentName, persona1, 
   };
 
   try {
-    const response = await fetch("http://192.168.1.42:3000", {
+    const response = await fetch("http://192.168.1.11:3000", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
