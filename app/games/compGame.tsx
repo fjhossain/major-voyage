@@ -1,5 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   KeyboardAvoidingView,
@@ -10,8 +11,10 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { API_URL } from "../../lib/api";
 
 const screenWidth = Dimensions.get("window").width;
+const CURRENT_MAJOR = "Computer Science";
 
 const challenges = [
   {
@@ -55,14 +58,107 @@ const challenges = [
   },
 ];
 
+type Params = { userId?: string; sessionId?: string; otherMajor?: string };
+
 export default function CompGameScreen() {
+  const {
+    userId: userIdParam,
+    sessionId: sessionIdParam,
+    otherMajor,
+  } = useLocalSearchParams<Params>();
+  const userId = userIdParam ? Number(userIdParam) : undefined;
+  const initialSessionId = sessionIdParam ? Number(sessionIdParam) : undefined;
+
   const [currentChallenge, setCurrentChallenge] = useState(0);
   const [selectedOrder, setSelectedOrder] = useState<string[]>([]);
   const [userInput, setUserInput] = useState("");
   const [score, setScore] = useState(0);
   const [completed, setCompleted] = useState(false);
+  const [sessionId, setSessionId] = useState<number | undefined>(
+    initialSessionId
+  );
 
+  const hasSavedRef = useRef(false);
   const challenge = challenges[currentChallenge];
+
+  useEffect(() => {
+    // If sessionId was missing, recover the most recent session that matches the two majors
+    (async () => {
+      if (sessionId || !userId) return;
+      try {
+        const res = await fetch(`${API_URL}/api/users/${userId}/sessions`);
+        if (!res.ok) return;
+        const rows: Array<{
+          id: number;
+          major1: string;
+          major2: string;
+          created_at: string;
+        }> = await res.json();
+        const normalize = (s: string) => s.trim().toLowerCase();
+        const other = (otherMajor || "").trim();
+        const found = rows.find((r) => {
+          const a = normalize(r.major1);
+          const b = normalize(r.major2);
+          const x = normalize(CURRENT_MAJOR);
+          const y = normalize(other);
+          return (
+            (a === x && b === y) || (a === y && b === x) || a === x || b === x
+          );
+        });
+        if (found) setSessionId(found.id);
+      } catch {}
+    })();
+  }, [sessionId, userId, otherMajor]);
+
+  const fetchWithTimeout = async (
+    input: RequestInfo | URL,
+    init?: RequestInit,
+    ms = 12000
+  ) =>
+    await Promise.race([
+      fetch(input, init),
+      new Promise<Response>((_r, reject) =>
+        setTimeout(() => reject(new Error("timeout")), ms)
+      ),
+    ]);
+
+  const saveScore = async () => {
+    if (hasSavedRef.current) return;
+    hasSavedRef.current = true;
+
+    try {
+      if (userId && sessionId) {
+        // PATCH session score (preferred)
+        const res = await fetchWithTimeout(
+          `${API_URL}/api/sessions/${sessionId}/score`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ major: CURRENT_MAJOR, score }),
+          }
+        );
+        if (res.ok) {
+          console.log("Saved to session scoring");
+          return;
+        }
+      }
+      // Fallback: legacy single save
+      if (userId) {
+        await fetchWithTimeout(`${API_URL}/save-single-score`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, majorName: CURRENT_MAJOR, score }),
+        });
+        console.log("Saved via legacy scoring");
+      }
+    } catch (e) {
+      console.log("Save score failed (will ignore):", (e as any)?.message || e);
+    }
+  };
+
+  useEffect(() => {
+    if (completed) saveScore();
+  }, [completed]);
 
   const handleSelect = (option: string) => {
     if (!selectedOrder.includes(option)) {
@@ -73,16 +169,15 @@ export default function CompGameScreen() {
   const checkAnswer = () => {
     let isCorrect = false;
 
-    if (challenge.type === "sorting" && challenge.answer) {
+    if (challenge.type === "sorting" && (challenge as any).answer) {
       isCorrect =
-        JSON.stringify(selectedOrder) === JSON.stringify(challenge.answer);
+        JSON.stringify(selectedOrder) ===
+        JSON.stringify((challenge as any).answer);
     } else if (challenge.type === "command" && "correctAnswer" in challenge) {
-      isCorrect = userInput.trim() === challenge.correctAnswer;
+      isCorrect = userInput.trim() === (challenge as any).correctAnswer;
     }
 
-    if (isCorrect) {
-      setScore((prev) => prev + 25);
-    }
+    if (isCorrect) setScore((prev) => prev + 25);
     nextChallenge();
   };
 
@@ -102,6 +197,7 @@ export default function CompGameScreen() {
     setUserInput("");
     setCurrentChallenge(0);
     setCompleted(false);
+    hasSavedRef.current = false;
   };
 
   return (
@@ -129,24 +225,26 @@ export default function CompGameScreen() {
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
           <Text style={styles.title}>Challenge {currentChallenge + 1}</Text>
-          <Text style={styles.question}>{challenge.question}</Text>
+          <Text style={styles.question}>{(challenge as any).question}</Text>
 
-          {challenge.type === "sorting" && challenge.options && (
+          {challenge.type === "sorting" && (challenge as any).options && (
             <View style={styles.optionsContainer}>
-              {challenge.options.map((option, index) => (
-                <Pressable
-                  key={index}
-                  style={
-                    selectedOrder.includes(option)
-                      ? styles.optionDisabled
-                      : styles.option
-                  }
-                  disabled={selectedOrder.includes(option)}
-                  onPress={() => handleSelect(option)}
-                >
-                  <Text style={styles.optionText}>{option}</Text>
-                </Pressable>
-              ))}
+              {(challenge as any).options.map(
+                (option: string, index: number) => (
+                  <Pressable
+                    key={index}
+                    style={
+                      selectedOrder.includes(option)
+                        ? styles.optionDisabled
+                        : styles.option
+                    }
+                    disabled={selectedOrder.includes(option)}
+                    onPress={() => handleSelect(option)}
+                  >
+                    <Text style={styles.optionText}>{option}</Text>
+                  </Pressable>
+                )
+              )}
 
               <Text style={styles.subheading}>Your Order:</Text>
               <View style={styles.selectedContainer}>
@@ -181,11 +279,7 @@ export default function CompGameScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: "center",
-  },
+  container: { flex: 1, padding: 20, justifyContent: "center" },
   title: {
     fontSize: 24,
     fontWeight: "bold",
@@ -199,9 +293,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "#333",
   },
-  optionsContainer: {
-    marginBottom: 20,
-  },
+  optionsContainer: { marginBottom: 20 },
   option: {
     backgroundColor: "#6a1b9a",
     padding: 12,
@@ -214,11 +306,7 @@ const styles = StyleSheet.create({
     marginVertical: 6,
     borderRadius: 10,
   },
-  optionText: {
-    color: "#fff",
-    fontSize: 16,
-    textAlign: "center",
-  },
+  optionText: { color: "#fff", fontSize: 16, textAlign: "center" },
   subheading: {
     fontSize: 16,
     fontWeight: "bold",
@@ -232,10 +320,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 20,
   },
-  selectedItem: {
-    fontSize: 14,
-    marginVertical: 2,
-  },
+  selectedItem: { fontSize: 14, marginVertical: 2 },
   checkBtn: {
     backgroundColor: "#6a1b9a",
     padding: 12,
@@ -243,10 +328,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-  checkText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
+  checkText: { color: "#fff", fontWeight: "bold" },
   input: {
     borderWidth: 1,
     borderColor: "#999",
@@ -275,8 +357,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-  resetText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
+  resetText: { color: "#fff", fontWeight: "bold" },
 });

@@ -1,6 +1,10 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Image,
   StyleSheet,
   Text,
@@ -12,12 +16,50 @@ import {
 export default function LoginScreen() {
   const router = useRouter();
 
-  const handleLogin = () => {
-    router.push("/personality");
-  };
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const goToRegister = () => {
-    router.push("/register");
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please enter email and password");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post("http://10.0.0.44:5000/login", {
+        email,
+        password,
+      });
+
+      if (response.data.success) {
+        // Save user info to AsyncStorage for profile screen
+        const userInfo = {
+          id: response.data.userId,
+          email: response.data.email,
+          username: response.data.username,
+        };
+        await AsyncStorage.setItem("user", JSON.stringify(userInfo));
+
+        setLoading(false);
+        router.push("/personality");
+      } else {
+        setLoading(false);
+        Alert.alert(
+          "Login Failed",
+          response.data.message || "Invalid credentials"
+        );
+      }
+    } catch (error: any) {
+      setLoading(false);
+      if (error.response) {
+        Alert.alert("Login error", error.response.data.message);
+      } else {
+        Alert.alert("Login error", "Something went wrong. Please try again.");
+      }
+    }
   };
 
   return (
@@ -27,13 +69,36 @@ export default function LoginScreen() {
         style={styles.logo}
       />
       <Text style={styles.title}>Login</Text>
-      <TextInput style={styles.input} placeholder="Username" />
-      <TextInput style={styles.input} placeholder="Password" secureTextEntry />
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Log In</Text>
+
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleLogin}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="white" />
+        ) : (
+          <Text style={styles.buttonText}>Log In</Text>
+        )}
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={goToRegister}>
+      <TouchableOpacity onPress={() => router.push("/register")}>
         <Text style={styles.registerText}>
           Don't have an account? Create one
         </Text>
@@ -80,6 +145,8 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginTop: 10,
     marginBottom: 20,
+    alignItems: "center",
+    justifyContent: "center",
   },
   buttonText: {
     color: "white",

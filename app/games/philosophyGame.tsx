@@ -1,5 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useRef, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
@@ -9,8 +10,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { API_URL } from "../../lib/api";
 
 const { width } = Dimensions.get("window");
+const CURRENT_MAJOR = "Philosophy";
 
 const challenges = [
   {
@@ -75,16 +78,59 @@ const challenges = [
   },
 ];
 
+type Params = { userId?: string; sessionId?: string; otherMajor?: string };
+
 export default function PhilosophyEmojiDrag() {
+  const {
+    userId: userIdParam,
+    sessionId: sessionIdParam,
+    otherMajor,
+  } = useLocalSearchParams<Params>();
+  const userId = userIdParam ? Number(userIdParam) : undefined;
+  const initialSessionId = sessionIdParam ? Number(sessionIdParam) : undefined;
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [showResults, setShowResults] = useState(false);
+  const [sessionId, setSessionId] = useState<number | undefined>(
+    initialSessionId
+  );
+
+  const hasSavedRef = useRef(false);
 
   const pan = useRef(new Animated.ValueXY()).current;
-
   const optionLayouts = useRef<
     (null | { x: number; y: number; width: number; height: number })[]
   >([]);
+
+  useEffect(() => {
+    // Recover sessionId if missing
+    (async () => {
+      if (sessionId || !userId) return;
+      try {
+        const res = await fetch(`${API_URL}/api/users/${userId}/sessions`);
+        if (!res.ok) return;
+        const rows: Array<{
+          id: number;
+          major1: string;
+          major2: string;
+          created_at: string;
+        }> = await res.json();
+        const normalize = (s: string) => s.trim().toLowerCase();
+        const other = (otherMajor || "").trim();
+        const found = rows.find((r) => {
+          const a = normalize(r.major1);
+          const b = normalize(r.major2);
+          const x = normalize(CURRENT_MAJOR);
+          const y = normalize(other);
+          return (
+            (a === x && b === y) || (a === y && b === x) || a === x || b === x
+          );
+        });
+        if (found) setSessionId(found.id);
+      } catch {}
+    })();
+  }, [sessionId, userId, otherMajor]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -97,11 +143,9 @@ export default function PhilosophyEmojiDrag() {
       }),
       onPanResponderRelease: (e, gesture) => {
         pan.flattenOffset();
-
         const layouts = optionLayouts.current;
         const touchX = gesture.moveX;
         const touchY = gesture.moveY;
-
         let droppedOnIndex = -1;
         for (let i = 0; i < layouts.length; i++) {
           const layout = layouts[i];
@@ -117,7 +161,6 @@ export default function PhilosophyEmojiDrag() {
             }
           }
         }
-
         if (droppedOnIndex === challenges[currentIndex].correctIndex) {
           setScore((prev) => prev + 10);
           goNext();
@@ -133,6 +176,49 @@ export default function PhilosophyEmojiDrag() {
     })
   ).current;
 
+  const fetchWithTimeout = async (
+    input: RequestInfo | URL,
+    init?: RequestInit,
+    ms = 12000
+  ) =>
+    await Promise.race([
+      fetch(input, init),
+      new Promise<Response>((_r, reject) =>
+        setTimeout(() => reject(new Error("timeout")), ms)
+      ),
+    ]);
+
+  const saveScore = async () => {
+    if (hasSavedRef.current) return;
+    hasSavedRef.current = true;
+    try {
+      if (userId && sessionId) {
+        const res = await fetchWithTimeout(
+          `${API_URL}/api/sessions/${sessionId}/score`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ major: CURRENT_MAJOR, score }),
+          }
+        );
+        if (res.ok) {
+          console.log("Saved to session scoring");
+          return;
+        }
+      }
+      if (userId) {
+        await fetchWithTimeout(`${API_URL}/save-single-score`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, majorName: CURRENT_MAJOR, score }),
+        });
+        console.log("Saved via legacy scoring");
+      }
+    } catch (e) {
+      console.log("Save score failed (ignored):", (e as any)?.message || e);
+    }
+  };
+
   const goNext = () => {
     pan.setValue({ x: 0, y: 0 });
     if (currentIndex + 1 === challenges.length) {
@@ -142,11 +228,16 @@ export default function PhilosophyEmojiDrag() {
     }
   };
 
+  useEffect(() => {
+    if (showResults) saveScore();
+  }, [showResults]);
+
   const restart = () => {
     setScore(0);
     setCurrentIndex(0);
     setShowResults(false);
     pan.setValue({ x: 0, y: 0 });
+    hasSavedRef.current = false;
   };
 
   const challenge = challenges[currentIndex];
@@ -184,12 +275,12 @@ export default function PhilosophyEmojiDrag() {
             key={i}
             style={styles.option}
             onLayout={(e) => {
-              e.target.measure((x, y, width, height, pageX, pageY) => {
+              e.target.measure?.((x, y, w, h, pageX, pageY) => {
                 optionLayouts.current[i] = {
                   x: pageX,
                   y: pageY,
-                  width,
-                  height,
+                  width: w,
+                  height: h,
                 };
               });
             }}
@@ -237,10 +328,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#fff",
   },
-  optionsContainer: {
-    marginBottom: 60,
-    width: "100%",
-  },
+  optionsContainer: { marginBottom: 60, width: "100%" },
   option: {
     backgroundColor: "rgba(94, 14, 88, 0.22)",
     padding: 16,
@@ -250,11 +338,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#fff",
   },
-  optionText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#fff",
-  },
+  optionText: { fontSize: 18, fontWeight: "600", color: "#fff" },
   emojiContainer: {
     position: "absolute",
     bottom: 100,
@@ -270,9 +354,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 6,
   },
-  emoji: {
-    fontSize: 36,
-  },
+  emoji: { fontSize: 36 },
   instruction: {
     marginTop: 20,
     fontSize: 16,
@@ -293,11 +375,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 20,
   },
-  scoreText: {
-    fontSize: 24,
-    color: "#fff",
-    textAlign: "center",
-  },
+  scoreText: { fontSize: 24, color: "#fff", textAlign: "center" },
   resultText: {
     fontSize: 22,
     color: "#fff",
@@ -311,9 +389,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     borderRadius: 10,
   },
-  restartText: {
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 18,
-  },
+  restartText: { color: "#fff", fontWeight: "700", fontSize: 18 },
 });

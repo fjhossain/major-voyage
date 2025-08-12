@@ -1,3 +1,4 @@
+import axios from "axios";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -12,25 +13,39 @@ import {
 } from "react-native";
 
 export default function RegisterScreen() {
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
 
-  const handleRegister = () => {
-    if (!name || !email || !password) {
+  const handleRegister = async () => {
+    if (!username || !email || !password) {
       Alert.alert("Error", "Please fill in all fields.");
       return;
     }
 
-    Alert.alert(
-      "Account Created",
-      "Your account has been successfully registered!"
-    );
+    try {
+      const response = await axios.post("http://10.0.0.44:5000/register", {
+        username,
+        email: email.trim().toLowerCase(),
+        password,
+      });
 
-    setTimeout(() => {
-      router.push("/login");
-    }, 1000);
+      Alert.alert(
+        "Success",
+        response.data.message || "Registration successful!"
+      );
+
+      setTimeout(() => {
+        router.push("/login");
+      }, 1000);
+    } catch (error: any) {
+      if (error.response) {
+        Alert.alert("Register failed", error.response.data.message);
+      } else {
+        Alert.alert("Register failed", "Something went wrong.");
+      }
+    }
   };
 
   return (
@@ -48,10 +63,11 @@ export default function RegisterScreen() {
       >
         <TextInput
           style={styles.input}
-          placeholder="User Name"
+          placeholder="Username"
           placeholderTextColor="#888"
-          value={name}
-          onChangeText={setName}
+          value={username}
+          onChangeText={setUsername}
+          autoCapitalize="none"
         />
       </LinearGradient>
 

@@ -63,6 +63,7 @@ export default function PersonalityScreen() {
       setCurrent(current + 1);
     } else {
       const result = calculateMBTI(updatedAnswers);
+
       router.push(`/result?type=${result}`);
     }
   };
@@ -78,17 +79,26 @@ export default function PersonalityScreen() {
       J: 0,
       P: 0,
     };
-
     ans.forEach((letter) => {
       if (letter) counts[letter]++;
     });
-
     return (
       (counts["E"] >= counts["I"] ? "E" : "I") +
       (counts["S"] >= counts["N"] ? "S" : "N") +
       (counts["T"] >= counts["F"] ? "T" : "F") +
       (counts["J"] >= counts["P"] ? "J" : "P")
     );
+  };
+
+  const getMajorsForType = (type: string) => {
+    switch (type) {
+      case "INTJ":
+        return { major1: "Computer Science", major2: "Philosophy" };
+      case "ENFP":
+        return { major1: "Arts", major2: "Marketing" };
+      default:
+        return { major1: "IT", major2: "Business" };
+    }
   };
 
   return (
@@ -122,7 +132,7 @@ export default function PersonalityScreen() {
 
       <Modal
         animationType="fade"
-        transparent={true}
+        transparent
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
@@ -166,43 +176,7 @@ export default function PersonalityScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    paddingTop: 60,
-    paddingBottom: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-    backgroundColor: "white",
-  },
-
-  backButton: {
-    position: "absolute",
-    top: 60,
-    left: 16,
-    padding: 4,
-  },
-
-  backText: {
-    color: "#1e3a8a",
-    fontSize: 17,
-    fontWeight: "500",
-  },
-
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "black",
-    textAlign: "center",
-  },
-
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "black",
-  },
+  container: { flex: 1 },
   image: {
     width: "90%",
     height: 500,
@@ -229,10 +203,7 @@ const styles = StyleSheet.create({
     minWidth: 90,
     alignItems: "center",
   },
-  buttonText: {
-    color: "black",
-    fontWeight: "bold",
-  },
+  buttonText: { color: "black", fontWeight: "bold" },
   modalBackground: {
     flex: 1,
     justifyContent: "center",
@@ -245,12 +216,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     elevation: 10,
   },
-  closeButton: {
-    position: "absolute",
-    top: 12,
-    right: 12,
-    zIndex: 1,
-  },
+  closeButton: { position: "absolute", top: 12, right: 12, zIndex: 1 },
   modalTitle: {
     position: "absolute",
     top: 16,

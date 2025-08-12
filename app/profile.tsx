@@ -1,32 +1,65 @@
-import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Image,
-  Pressable,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { API_URL } from "../lib/api";
 
-const ProfileScreen = () => {
+export default function ProfileScreen() {
   const router = useRouter();
 
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [perfectMajor, setPerfectMajor] = useState("");
-
-  const [hidePassword, setHidePassword] = useState(true);
+  const [userId, setUserId] = useState<number | null>(null);
+  const [username, setUsername] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
 
   useEffect(() => {
-    const fetchUserData = async () => {};
+    (async () => {
+      try {
+        const userString = await AsyncStorage.getItem("user");
+        if (!userString) {
+          router.push("/login");
+          return;
+        }
+        const user = JSON.parse(userString);
+        setUserId(Number(user.id));
+        setUsername(user.username || "");
+        setEmail(user.email || "");
 
-    fetchUserData();
+        try {
+          const res = await fetch(`${API_URL}/user/${user.id}`);
+          if (res.ok) {
+            const fresh = await res.json();
+            setUsername(fresh.username || "");
+            setEmail(fresh.email || "");
+          }
+        } catch {}
+      } catch (e) {
+        console.error("Error loading user data:", e);
+        await AsyncStorage.removeItem("user");
+        router.push("/login");
+      }
+    })();
   }, []);
+
+  const onScores = () => {
+    if (!userId) {
+      Alert.alert("Not signed in", "Please log in again.");
+      router.push("/login");
+      return;
+    }
+    router.push("/scores" as any);
+  };
+
+  const onPerfectMajor = () => {
+    router.push("/perfect-major");
+  };
 
   return (
     <LinearGradient colors={["#a18cd1", "#fbc2eb"]} style={styles.container}>
@@ -42,58 +75,25 @@ const ProfileScreen = () => {
 
       <View style={styles.infoBox}>
         <Text style={styles.infoTitle}>Username:</Text>
-        <TextInput
-          style={styles.input}
-          value={username}
-          onChangeText={setUsername}
-          placeholder="Enter your name"
-          placeholderTextColor="#ddd"
-        />
+        <Text style={styles.infoText}>{username}</Text>
 
         <Text style={styles.infoTitle}>Email:</Text>
-        <TextInput
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-          placeholder="Enter your email"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          placeholderTextColor="#ddd"
-        />
+        <Text style={styles.infoText}>{email}</Text>
 
         <Text style={styles.infoTitle}>Password:</Text>
-        <View style={styles.passwordContainer}>
-          <TextInput
-            style={[styles.input, { flex: 1 }]}
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Enter your password"
-            secureTextEntry={hidePassword}
-            placeholderTextColor="#ddd"
-          />
-          <TouchableOpacity onPress={() => setHidePassword(!hidePassword)}>
-            <Ionicons
-              name={hidePassword ? "eye-off" : "eye"}
-              size={20}
-              color="#fff"
-              style={{ marginLeft: 10 }}
-            />
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.infoText}>********</Text>
       </View>
 
-      <Pressable style={styles.button} onPress={() => router.push("")}>
+      <TouchableOpacity style={styles.button} onPress={onScores}>
         <Text style={styles.buttonText}>View My Scores</Text>
-      </Pressable>
+      </TouchableOpacity>
 
-      <Pressable style={styles.button} onPress={() => router.push("")}>
+      <TouchableOpacity style={styles.button} onPress={onPerfectMajor}>
         <Text style={styles.buttonText}>View My Perfect Major</Text>
-      </Pressable>
+      </TouchableOpacity>
     </LinearGradient>
   );
-};
-
-export default ProfileScreen;
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -112,6 +112,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
     marginBottom: 20,
+    textAlign: "center",
   },
   infoBox: {
     width: "100%",
@@ -124,21 +125,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#fff",
     fontWeight: "600",
+    marginTop: 10,
   },
-  input: {
+  infoText: {
     fontSize: 16,
     color: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#fff",
-    marginBottom: 15,
-    paddingVertical: 5,
-  },
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "#fff",
-    marginBottom: 15,
+    marginBottom: 5,
   },
   button: {
     backgroundColor: "#fff",
@@ -150,6 +142,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
     marginTop: 10,
+    width: "100%",
+    alignItems: "center",
   },
   buttonText: {
     color: "#8e2de2",

@@ -1,6 +1,10 @@
+// app/result.tsx
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useMemo, useState } from "react";
 import { Alert, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { API_URL } from "../lib/api";
 
 const personalityData: Record<
   string,
@@ -131,16 +135,82 @@ export default function ResultScreen() {
 
   const result = typeof type === "string" ? type.toUpperCase() : "";
   const data = personalityData[result];
+  const majors = useMemo(() => data?.majors ?? [], [data]);
 
-  const handleMajorPress = (major: string) => {
-    const key = normalizeMajor(major);
+  const [userId, setUserId] = useState<number | null>(null);
+  const [sessionId, setSessionId] = useState<number | null>(null);
+  const [starting, setStarting] = useState(false);
 
-    if (key in majorRouteMap) {
-      const route = majorRouteMap[key as MajorKeys];
-      router.push(route as unknown as Parameters<typeof router.push>[0]);
-    } else {
-      Alert.alert("Error", `No game screen found for major: ${major}`);
+  // load real logged-in user id
+  useEffect(() => {
+    (async () => {
+      try {
+        const userStr = await AsyncStorage.getItem("user");
+        if (!userStr) {
+          router.push("/login");
+          return;
+        }
+        const user = JSON.parse(userStr);
+        setUserId(Number(user.id));
+      } catch {
+        router.push("/login");
+      }
+    })();
+  }, []);
+
+  // start a backend session **once** for the two suggested majors
+  const ensureSessionOnce = async () => {
+    if (sessionId) return sessionId;
+    if (!userId || majors.length < 2) {
+      Alert.alert("Missing info", "User or suggested majors not ready yet.");
+      return null;
     }
+    setStarting(true);
+    try {
+      const res = await fetch(`${API_URL}/api/sessions/start`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          major1: majors[0],
+          major2: majors[1],
+        }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const json = await res.json();
+      const sid = Number(json.sessionId);
+      setSessionId(sid);
+      return sid;
+    } catch (e: any) {
+      Alert.alert("Error", e?.message ?? "Could not start a test session.");
+      return null;
+    } finally {
+      setStarting(false);
+    }
+  };
+
+  const handleMajorPress = async (major: string) => {
+    const key = normalizeMajor(major);
+    if (!(key in majorRouteMap)) {
+      Alert.alert("Error", `No game screen found for major: ${major}`);
+      return;
+    }
+    const route = majorRouteMap[key as MajorKeys];
+
+    const sid = await ensureSessionOnce();
+    if (!sid || !userId) return;
+
+    // pass the "other" major too (helpful inside a game if needed)
+    const otherMajor = majors.find((m) => normalizeMajor(m) !== key) ?? major;
+
+    router.push({
+      pathname: route as any, // cast keeps TS happy if route types aren't generated
+      params: {
+        userId: String(userId),
+        sessionId: String(sid),
+        otherMajor,
+      },
+    });
   };
 
   return (
@@ -162,17 +232,23 @@ export default function ResultScreen() {
       </View>
 
       <Text style={styles.title}>Your Personality Type: {result}</Text>
+
       {data ? (
         <>
           <Text style={styles.description}>{data.description}</Text>
-          <Text style={styles.subheading}>Suggested Majors:</Text>
-          {data.majors.map((major, index) => (
+          <Text style={styles.subheading}>
+            Suggested Majors{starting ? " (starting session…)" : ""}
+          </Text>
+          {majors.map((major, index) => (
             <Pressable
               key={index}
               style={styles.majorButton}
               onPress={() => handleMajorPress(major)}
+              disabled={starting || !userId}
             >
-              <Text style={styles.majorText}>{major}</Text>
+              <Text style={styles.majorText}>
+                {major} {starting ? "…" : ""}
+              </Text>
             </Pressable>
           ))}
         </>
