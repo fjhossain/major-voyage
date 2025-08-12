@@ -11,7 +11,7 @@ function decryptData(encrypted, timekey) {
 async function handleServiceRequest(serviceData) {
   const { service, payload } = serviceData;
 
-  const {
+  let {
     email,
     password,
     studentName,
@@ -34,7 +34,7 @@ async function handleServiceRequest(serviceData) {
     return;
   }
 
-  const postdata = {
+  let postdata = {
     encryptedField: decryptedPass,
     timekey,
     studentName,

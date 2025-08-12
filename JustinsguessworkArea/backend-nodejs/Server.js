@@ -26,7 +26,7 @@ function decryptData(encrypted, timekey) {
 
 //  Unified handler
 function processRequest(req, res, serviceType) {
-  const {
+  let [
     encryptedField,
     timekey,
     studentName,
@@ -37,7 +37,7 @@ function processRequest(req, res, serviceType) {
     persona4,
     selectedDegreeNo,
     degreePercentSet
-  } = req.body;
+   ] = req.body;
 
   let decryptedPass;
   try {

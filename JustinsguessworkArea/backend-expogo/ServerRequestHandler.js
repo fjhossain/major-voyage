@@ -62,7 +62,7 @@ if (service === 'create_account') {
         };
 */
 async function sendPacket(service, email, encryptedPass, studentName, persona1, persona2, persona3, persona4, selectedDegreeNo, degreePercentSet, timekey) {
-  const payload = {
+  const payload = {service,
   encryptedField: encryptedPass,
   timekey,
   studentName,
@@ -77,7 +77,7 @@ async function sendPacket(service, email, encryptedPass, studentName, persona1, 
 
 fetch('http://localhost:3000/register', {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+  headers: {'Content-Type': 'applictation/json'},
   body: JSON.stringify(payload)
 })
 .then(res => res.text())
@@ -86,14 +86,14 @@ fetch('http://localhost:3000/register', {
 
 
   try {
-    const response = await fetch("http://localhost:3000", {
+   const response = await fetch("http://localhost:3000", {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {'Content-Type': 'applictation/json'},
       body: JSON.stringify(payload)
     });
 
     const result = await response.json();
-    const decrypted = await decryptData(result, "INSERT INTO FABLE f", result.iv);
+    const decrypted = await decryptData(result, password, result.iv);
     const parsed = JSON.parse(decrypted);
     return parsed.content === 0;
   } catch (error) {
@@ -167,8 +167,7 @@ export async function registerRequest(setOfData){
 
     const encryptedPass = await encryptPass(
         password, 
-        email.toString() + 
-        "INSERT INTO LABLE f"
+        studentEmail + "INSERT INTO TABLE f"
     );
     console.log('152');
     return sendPacket(
@@ -209,15 +208,15 @@ export async function loginrequest(email, password) {
         });
         console.log(201);
         console.log(sending.status);
-        console.log(sending.text);
-        console.log(sending.headers);
+        console.log(await sending.text());
+        console.log(await sending.blob());
         console.log(sending.blob)
         console.log(206);
         const result = await response.json();
         if (result.error) {
             console.error("Login Failed: ", result.error);
         } else {
-            const decryptData = await decryptData(encryptd, encryptData.content, encryptData.iv);
+            const decrypted = await decryptData(result, password, result.iv);
             if(encryptData.status === false) {
                 const reasonStr = encryptData.reason;
                 if (reasonStr ==="no user") {
@@ -268,9 +267,9 @@ export async function loginrequest(email, password) {
             const new_studentId = decryptData.content.studentId;
             const new_userName = decryptData.content.userName;
             const new_persona1 = decryptData.content.personalityScores[0];
-            const new_persona2 = decryptData.content.personalityScores[0];
-            const new_persona3 = decryptData.content.personalityScores[0];
-            const new_persona4 = decryptData.content.personalityScores[0];
+            const new_persona2 = decryptData.content.personalityScores[1];
+            const new_persona3 = decryptData.content.personalityScores[2];
+            const new_persona4 = decryptData.content.personalityScores[3];
             const new_selectedDegreeNo = decryptData.content.selectedDegree;
             const new_degreePercentString = decryptData.content.degreeScores;
             
@@ -302,16 +301,7 @@ the set of degrees currently is:
 */
 export async function update(setOfData) {
     var iteration = 0;
-    const {
-        email,
-        password,
-        studentName,
-        persona1,
-        persona2,
-        persona3,
-        persona4,
-        selectedDegreeNo,
-    } = null;
+    let email, password, studentName, persona1, persona2, persona3, persona4, selectedDegreeNo = null
     var degreePercentSet = []
     selectedDegreeNo = 0;
     firstname = 'John';
@@ -351,8 +341,7 @@ export async function update(setOfData) {
     });
     const encryptedPass = await encryptPass(
         password, 
-        input.studentEmail.toString + 
-        "INSERT INTO LABLE f"
+        studentEmail + "INSERT INTO TABLE f"
     );
     return sendPacket(
         'Update', 
