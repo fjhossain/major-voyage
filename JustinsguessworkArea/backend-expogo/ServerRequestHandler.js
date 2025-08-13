@@ -4,36 +4,47 @@ import AES from 'react-native-aes-crypto';
 import 'react-native-get-random-values';
 
 export async function deriveKey(secret) {
-  const hash = await Crypto.digestStringAsync(
-    Crypto.CryptoDigestAlgorithm.SHA256,
-    secret
-  );
-  return hash; // already hex string
+    console.log('7');
+    const hash = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        secret
+    );
+    console.log('12');
+    return hash; // already hex string
 }
 
 export async function encryptData(data, secret) {
-  const key = await deriveKey(secret);
-  const iv = Crypto.getRandomBytes(16); // returns Uint8Array
-  const ivHex = Buffer.from(iv).toString('hex');
-
-  const encrypted = await AES.encrypt(data, key, ivHex);
-  return {
-    iv: ivHex,
-    content: encrypted
-  };
+    console.log('17');
+    const key = await deriveKey(secret);
+    console.log('19');
+    const iv = Crypto.getRandomBytes(16); // returns Uint8Array
+    console.log('21');
+    const ivHex = Buffer.from(iv).toString('hex');
+    console.log('23');
+    const encrypted = await AES.encrypt(data, key, ivHex);
+    console.log('25');
+    return {
+        iv: ivHex,
+        content: encrypted
+    };
 }
 
 export async function decryptData(encrypted, secret, ivHex) {
-  const key = await deriveKey(secret);
-  const decrypted = await AES.decrypt(encrypted.content, key, ivHex);
-  return decrypted;
+    console.log('33');
+    const key = await deriveKey(secret);
+    console.log('35');
+    const decrypted = await AES.decrypt(encrypted.content, key, ivHex);
+    console.log('37');
+    return decrypted;
 }
 const algorithm = 'aes=256-cbc';
 
 
 export async function encryptPass(password, email) {
-  const secret = email + "INSERT INTO TABLE f";
-  return await encryptData(password, secret);
+    console.log('44');
+    const secret = email + "INSERT INTO TABLE f";
+    console.log('46');
+    return await encryptData(password, secret);
 }
 
 /*
@@ -62,42 +73,47 @@ if (service === 'create_account') {
         };
 */
 async function sendPacket(service, email, encryptedPass, studentName, persona1, persona2, persona3, persona4, selectedDegreeNo, degreePercentSet, timekey) {
-  const payload = {service,
-  encryptedField: encryptedPass,
-  timekey,
-  studentName,
-  studentEmail: email,
-  persona1,
-  persona2,
-  persona3,
-  persona4,
-  selectedDegreeNo,
-  degreePercentSet
-};
-
-fetch('http://localhost:3000/register', {
-  method: 'POST',
-  headers: {'Content-Type': 'applictation/json'},
-  body: JSON.stringify(payload)
-})
-.then(res => res.text())
-.then(data => console.log('Server response:', data))
-.catch(err => console.error('Request failed:', err));
-
-
-  try {
-   const response = await fetch("http://localhost:3000", {
-      method: 'POST',
-      headers: {'Content-Type': 'applictation/json'},
-      body: JSON.stringify(payload)
+    console.log('76');
+    const payload = {service,
+        encryptedField: encryptedPass,
+        timekey,
+        studentName,
+        studentEmail: email,
+        persona1,
+        persona2,
+        persona3,
+        persona4,
+        selectedDegreeNo,
+        degreePercentSet
+    };
+    console.log('89');
+    fetch('http://localhost:3000/register', {
+        method: 'POST',
+        headers: {'Content-Type': 'applictation/json'},
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.text())
+    .then(data => console.log('Server response:', data))
+    .catch(err => console.error('Request failed:', err));
+    console.log('98');
+    try {
+        const response = await fetch("http://localhost:3000", {
+        method: 'POST',
+        headers: {'Content-Type': 'applictation/json'},
+        body: JSON.stringify(payload)
     });
-
+    console.log('105');
     const result = await response.json();
+    console.log('107');
     const decrypted = await decryptData(result, password, result.iv);
+    console.log('109');
     const parsed = JSON.parse(decrypted);
+    console.log('111');
     return parsed.content === 0;
   } catch (error) {
+    console.log('114');
     console.error('Failed to send data:', error);
+    console.log('116');
     return false;
   }
 }

@@ -4,6 +4,7 @@ import 'react-native-get-random-values';
 
 //  Key Derivation
 export async function deriveKey(secret) {
+  console.log('7');
   return await Crypto.digestStringAsync(
     Crypto.CryptoDigestAlgorithm.SHA256,
     secret
@@ -12,42 +13,54 @@ export async function deriveKey(secret) {
 
 //  Encryption
 export async function encryptData(data, secret) {
+  console.log('16');
   const key = await deriveKey(secret);
+  console.log('18');
   const iv = Crypto.getRandomBytes(16); // Uint8Array
+  console.log('20');
   const ivHex = Buffer.from(iv).toString('hex');
+  console.log('22');
   const encrypted = await AES.encrypt(data, key, ivHex);
-
+  console.log('24');
   return { iv: ivHex, content: encrypted };
 }
 
 //  Decryption
 export async function decryptData(encryptedField, secret) {
+  console.log('30');
   const key = await deriveKey(secret);
+  console.log('32');
   return await AES.decrypt(encryptedField.content, key, encryptedField.iv);
 }
 
 //  Password Encryption Wrapper
 export async function encryptPass(password, email) {
+  console.log('38');
   const secret = email + 'INSERT INTO TABLE f';
+  console.log('40');
   return await encryptData(password, secret);
 }
 // Timeout helper
 function timeoutPromise(ms) {
+  console.log('45');
   return new Promise((_, reject) =>
     setTimeout(() => reject(new Error('Request timed out')), ms)
   );
 }
 
 async function sendPacketWithRetry(service, payload, maxAttempts = 3) {
+  console.log('52');
   const TIMEOUT_MS = 7000;
-
+  console.log('54');
   function timeoutPromise(ms) {
     return new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Request timed out')), ms)
     );
   }
-
+  console.log('60');
+  var times = 0
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    console.log('63:' + times.toString());
     try {
       const response = await Promise.race([
         fetch('http://localhost:3000/submit', {
@@ -57,31 +70,39 @@ async function sendPacketWithRetry(service, payload, maxAttempts = 3) {
         }),
         timeoutPromise(TIMEOUT_MS)
       ]);
-
+      console.log('73:' + times);
       const result = await response.json();
+      console.log('75:' + times);
       return result;
     } catch (error) {
+      console.log('78:' + times);
       const isTimeout = error.message.includes('timed out');
+      console.log('80:' + times);
       const isNetwork = error.message.includes('Network');
-
+      console.log('82:' + times);
       const shouldRetry = isTimeout || isNetwork;
-
+      console.log('84:' + times);
       console.warn(` Attempt ${attempt} failed: ${error.message}`);
-
+      console.log('86:' + times);
       if (!shouldRetry || attempt === maxAttempts) {
+        console.log('88:' + times);
         return { error: isTimeout ? 'timeout' : 'network error' };
       }
-
+      console.log('91:' + times);
       //  Exponential backoff
       const backoff = 500 * Math.pow(2, attempt - 1);
+      console.log('94:' + times);
       await new Promise(res => setTimeout(res, backoff));
     }
+    console.log('97:' + times);
+    times += 1;
   }
 }
 
 
 //  Registration
 export async function registerRequest(setOfData) {
+  console.log('105');
   const [
     email,
     password,
@@ -93,9 +114,9 @@ export async function registerRequest(setOfData) {
     selectedDegreeNo = 0,
     degreePercentSet
   ] = setOfData;
-
+  console.log('117');
   const encryptedPass = await encryptPass(password, email);
-
+  console.log('119');
   const payload = {
     encryptedField: encryptedPass,
     timekey: Date.now(),
@@ -108,7 +129,7 @@ export async function registerRequest(setOfData) {
     selectedDegreeNo,
     degreePercentSet
   };
-
+  console.log('132');
   return await sendPacket('create_account', payload);
 }
 
