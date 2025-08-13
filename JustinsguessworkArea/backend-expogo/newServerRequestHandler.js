@@ -1,8 +1,6 @@
 import * as Crypto from 'expo-crypto';
 import AES from 'react-native-aes-crypto';
-import 'react-native-get-random-values';
 
-//  Key Derivation
 export async function deriveKey(secret) {
   console.log('7');
   return await Crypto.digestStringAsync(
@@ -10,18 +8,25 @@ export async function deriveKey(secret) {
     secret
   ); // returns hex string
 }
+console.log('AES module:', AES);
 
+function hexArrayToDecimal(arr) {
+  const hexString = arr
+    .map(n => n.toString(16).padStart(2, '0')) // convert to 2-digit hex
+    .join(''); // concatenate
+
+  return BigInt('0x' + hexString); // convert to decimal using BigInt
+}
 //  Encryption
 export async function encryptData(data, secret) {
-  console.log('16');
   const key = await deriveKey(secret);
-  console.log('18');
-  const iv = Crypto.getRandomBytes(16); // Uint8Array
-  console.log('20');
-  const ivHex = Buffer.from(iv).toString('hex');
-  console.log('22');
+  const iv = Crypto.getRandomBytes(16); // 16 bytes for AES-256-CBC
+
+  const ivHex = Array.from(iv)
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+
   const encrypted = await AES.encrypt(data, key, ivHex);
-  console.log('24');
   return { iv: ivHex, content: encrypted };
 }
 
@@ -63,7 +68,7 @@ async function sendPacketWithRetry(service, payload, maxAttempts = 3) {
     console.log('63:' + times.toString());
     try {
       const response = await Promise.race([
-        fetch('http://localhost:3000/submit', {
+        fetch('http://192.168.1.12:3000/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ service, ...payload })
