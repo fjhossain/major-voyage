@@ -66,13 +66,13 @@ async function sendPacketWithRetry(service, payload, maxAttempts = 3) {
 
       const shouldRetry = isTimeout || isNetwork;
 
-      console.warn(`⚠️ Attempt ${attempt} failed: ${error.message}`);
+      console.warn(` Attempt ${attempt} failed: ${error.message}`);
 
       if (!shouldRetry || attempt === maxAttempts) {
         return { error: isTimeout ? 'timeout' : 'network error' };
       }
 
-      // ⏳ Exponential backoff
+      //  Exponential backoff
       const backoff = 500 * Math.pow(2, attempt - 1);
       await new Promise(res => setTimeout(res, backoff));
     }
