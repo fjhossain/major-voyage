@@ -1,5 +1,13 @@
 const axios = require('axios');
+var { loginAsk } = require('./login');
+var { registerNow } = require('./addstudent');
+var { updateNow } = require('./updatestudent')
+const crypto = require('crypto');
+const algorithm = 'aes-256-cbc';
 
+function deriveKey(secret) {
+  return crypto.createHash('sha256').update(secret).digest();
+}
 function decryptData(encrypted, timekey) {
     const key = deriveKey(timekey);
     const iv = Buffer.from(encrypted.iv, 'hex');
@@ -10,19 +18,13 @@ function decryptData(encrypted, timekey) {
 }
 async function handleServiceRequest(serviceData) {
   const { service, payload } = serviceData;
+  let email, password, studentName, persona1, persona2, persona3, persona4, selectedDegreeNo, degreePercentSet, timekey;
 
-  let {
-    email,
-    password,
-    studentName,
-    persona1,
-    persona2,
-    persona3,
-    persona4,
-    selectedDegreeNo,
-    degreePercentSet,
-    timekey
-  } = payload;
+  if (service === 'login') {
+    ({ email, password, timekey } = payload);
+  } else {
+    ({ email, password, studentName, persona1, persona2, persona3, persona4, selectedDegreeNo, degreePercentSet, timekey } = payload);
+  }
 
   const secret = email + "INSERT INTO TABLE f";
   let decryptedPass;
@@ -33,38 +35,40 @@ async function handleServiceRequest(serviceData) {
     console.error(`Decryption failed for ${email}:`, err.message);
     return;
   }
-
-  let postdata = {
-    encryptedField: decryptedPass,
-    timekey,
-    studentName,
-    studentEmail: email,
-    persona1,
-    persona2,
-    persona3,
-    persona4,
-    selectedDegreeNo,
-    degreePercentSet
-  };
-
-  let endpoint;
-  if (service === 'create_account') {
-    endpoint = 'http://localhost:3000/register';
+  if (service === 'register') {
+    return registerNow(
+      email, 
+      studentName, 
+      password, 
+      persona1, 
+      persona2, 
+      persona3, 
+      persona4, 
+      selectedDegreeNo, 
+      degreePercentSet
+    )
   } else if (service === 'update') {
-    endpoint = 'http://localhost:3000/update';
+    return updateNow(
+      email, 
+      password, 
+      studentName, 
+      persona1, 
+      persona2, 
+      persona3, 
+      persona4, 
+      selectedDegreeNo, 
+      degreePercentSet
+    )
   } else if (service === 'login') {
-    endpoint = 'http://localhost:3000/login';
+    return loginAsk(
+      email, 
+      password
+    )
   } else {
     console.log('Unsupported service type:', service);
     return;
   }
 
-  try {
-    await axios.post(endpoint, postdata);
-    console.log(`${service} successful for:`, email);
-  } catch (err) {
-    console.error(`${service} failed for ${email}:`, err.message);
-  }
 }
 
 module.exports = { handleServiceRequest };

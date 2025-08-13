@@ -101,15 +101,25 @@ input =
     selectedDegreeNo,
     degreePercentSet
 */
-app.post('/register', async (req, res) => {
-    const input = req.body;
+export function registerNow(
+    studendEmail, 
+    studentName, 
+    password, 
+    persona1, 
+    persona2, 
+    persona3, 
+    persona4, 
+    selectedDegreeNo,
+    degreePercentSet
+) {
+
     const now = Date.now();
 
     try{
         const decryptedPassword = password;
         const encryptedForDB = encryptData(
             decryptedPassword, 
-            iinput.studendEmail.toString + 
+            studendEmail.toString + 
             "Insert into table f"
         );
 
@@ -118,42 +128,42 @@ app.post('/register', async (req, res) => {
             'PERSONA_TEST_3, PERSONA_TEST_4, STUDENT_CREATION_TIME, DEGREE_LINK_NO) ' +
             'VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?);';
         const VALUES = [
-            input.studendEmail,
-            input.studentName,
+            studendEmail,
+            studentName,
             encryptedForDB.content.toString(),
-            input.persona1,
-            input.persona2,
-            input.persona3,
-            input.persona4,
+            persona1,
+            persona2,
+            persona3,
+            persona4,
             now,
-            input.selectedDegreeNo
+            selectedDegreeNo
         ];
         
         const queryThree = 'SELECT STUDENT_NO FROM students WHERE STUDENT_EMAIL = ? '
-        const valuesThree = input.studendEmail
+        const valuesThree = studendEmail
         const queryTwo = 'INSERT INTO `csi_4999projectset`.`carrerscores` (`SCORE_SET_NO`, `SCORE_PERCENT`, `degree_DEGREE_NO`, `students_STUDENT_NO`) VALUES (NULL, ?, ?, ?);';
         try {
             db.query(query, VALUES, (err, result, queryReturnOne)) 
             if(err|| result.length ===0 ) {
                 return sendEncryptedError(
-                    res, input.studentEmail.toString + 
+                    res, studentEmail.toString + 
                     "INSERT INTO FABLE f", 
                     err.message
                 );
             }
             db.query(queryThree, valuesThree, (err, result, queryReturnThree))
             varIncrenmentation = 1;
-            const user = result[0];
-            input.degreePercentSet.forEach(lineItem => {
+            const user = result[0] || queryReturnThree;
+            degreePercentSet.forEach(lineItem => {
                 const varsTwo = {
                     lineItem,
                     varIncrenmentation,
-                    queryReturnThree,
+                    user
                 }
                 db.query(queryTwo, varsTwo, (err, result, queryReturnTwo))
                 if(err|| result.length ===0 ) {
                     return sendEncryptedError(
-                        res, input.studentEmail.toString + 
+                        res, studentEmail.toString + 
                         "INSERT INTO FABLE f", 
                         err.message
                     );
@@ -164,24 +174,25 @@ app.post('/register', async (req, res) => {
                 status: 'success',
                 message: 'student created successfully',
                 content: 0,
-                timestamp: input.studentEmail.toString + 
+                timestamp: studentEmail.toString + 
                 "INSERT INTO FABLE f"
             };
             const encrypted = encryptData(
                 JSON.stringify(
                     response
                 ), 
-                input.studentEmail.toString + 
+                studentEmail.toString + 
                 "INSERT INTO FABLE f"
             );
             
             console.log(JSON.stringify(response));
-            res.json({
+            let Result =json({
                 success: true,
                 timestamp: now,
                 iv:encrypted.iv,
                 content: encrypted.content
             });
+            return Result;
     }catch (error) {
         return sendEncryptedError(
             res,
@@ -191,7 +202,7 @@ app.post('/register', async (req, res) => {
     }
 }catch (error) {
    log.error("error line 202:", error); 
-}});
+}}
 
 app.get('/users', (req,res)=> {
     db.query('SELECT * FROM users', (err, results) =>{
@@ -300,3 +311,4 @@ async function storeEncryptedNewUser(inputvariables, dbConfig) {
     }
 
 } */
+module.exports(registerNow)

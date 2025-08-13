@@ -83,7 +83,7 @@ function sendEncryptedError(res, timestamp, message, reason){
         JSON.stringify(response), 
         timestamp
     );
-    res.status(500).json ({
+    return json ({
         success: false,
         timestamp,
         iv: encrypted.iv,
@@ -91,11 +91,7 @@ function sendEncryptedError(res, timestamp, message, reason){
         reason: reasonStr
     });
 }
-app.post('/update', async (req, res) => {
-    const input = req.body;
-    const now = Date.now();
-    const {
-            email,
+export function updateNow(email,
             encryptedField,
             studentName,
             persona1,
@@ -103,9 +99,8 @@ app.post('/update', async (req, res) => {
             persona3,
             persona4,
             selectedDegreeNo,
-            degreePercentSet,
-            timeKey
-        }= input
+            degreePercentSet) {
+    const now = Date.now();
    try {
         const decryptedPassword = encryptedField;
         const encrypted = encryptData(
@@ -217,7 +212,7 @@ app.post('/update', async (req, res) => {
                 "INSERT INTO FABLE f"
             );
 
-            res.json({
+            return json({
                 success: true,
                 timestamp: now,
                 iv:encrypted.iv,
@@ -230,4 +225,5 @@ app.post('/update', async (req, res) => {
             errormessage || 'Encryption or valitdation error'
         );
     }
-});
+}
+module.exports(updateNow);

@@ -166,8 +166,7 @@ export async function registerRequest(setOfData){
     console.log('145');
 
     const encryptedPass = await encryptPass(
-        password, 
-        studentEmail + "INSERT INTO TABLE f"
+        password, studentEmail 
     );
     console.log('152');
     return sendPacket(
@@ -188,7 +187,7 @@ export async function registerRequest(setOfData){
 
 export async function loginrequest(email, password) {
     const timeKey = Date.now().toString();
-    const encryptedPassword = await encryptPass(password, timeKey);
+    const encryptedPassword = await encryptPass(password, studentEmail + "INSERT INTO TABLE f");
     console.log(184);
     
     const payload = {

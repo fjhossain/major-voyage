@@ -111,12 +111,12 @@ degree_DEGREE_NO,
 students_STUDENT_NO
 */
 
-app.post('/login', (req, res) => {
-    const{userEmail, encryptedField, timekey} = req.body;
+export function loginAsk(userEmail, encryptedField) {
+
     const now = Date.now();
     
     try {
-        const decryptedPassword = password;
+        const decryptedPassword = encryptedField;
         const encrypted = encryptData(
             decryptedPassword, 
             crypto.createHash(
@@ -168,7 +168,7 @@ app.post('/login', (req, res) => {
             json.stringify(responsePayload), 
             now
         );
-        res.json({
+        return json({
             success: true,
             timestamp: now,
             iv: reencrypted.iv,
@@ -183,14 +183,14 @@ app.post('/login', (req, res) => {
             2
         );
     }
-});
+}
 
 
-function deriveKey(secret) {
+export function deriveKey(secret) {
     return crypto.createHash('sha256').update(secret).digest();
 }
 
-function encryptData(data, keySource) {
+export function encryptData(data, keySource) {
     const key = deriveKey(keySource.toString());
     const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv(algorithm, key, iv);
@@ -202,7 +202,7 @@ function encryptData(data, keySource) {
     };
 }
 
-function decryptData(encrypted, keySource, ivHex) {
+export function decryptData(encrypted, keySource, ivHex) {
     const key = deriveKey(keySource.toString());
     const iv = Buffer.from(ivHex, 'hex');
     const decipher = crypto.createDecipheriv(algorithm, key, iv);
@@ -215,8 +215,4 @@ function encryptPass(password, email) {
     return encryptData(password, email + "INSERT INTO TABLE f");
 }
 
-module.exports = { encryptPass, decryptData };
-
-app.listen(3307, () => console.log(
-    'login server renning on port 3307'
-))
+module.exports(loginAsk);

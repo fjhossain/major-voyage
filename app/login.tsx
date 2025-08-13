@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-import { loginrequest } from "../JustinsguessworkArea/backend-expogo/ServerRequestHandler";
+import { loginrequest } from "../JustinsguessworkArea/backend-expogo/newServerRequestHandler";
 
 export default function LoginScreen() {
   const router = useRouter();

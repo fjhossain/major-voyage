@@ -10,7 +10,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import * as wierdscript from "../JustinsguessworkArea/backend-expogo/ServerRequestHandler";
+import * as wierdscript from "../JustinsguessworkArea/backend-expogo/newServerRequestHandler";
 /*
 setOfData contains(in this order){
     STUDENT_EMAIL, 

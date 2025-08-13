@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
 
+
 const app = express();
 const PORT = 3000;
 
@@ -41,14 +42,14 @@ function processRequest(req, res, serviceType) {
 
   let decryptedPass;
   try {
-    decryptedPass = decryptData({ content: encryptedField, iv: 'your_iv_here' }, studentEmail + "INSERT INTO TABLE f");
+    decryptedPass = decryptData(encryptedField, studentEmail + "INSERT INTO TABLE f");
   } catch (err) {
     console.error(`Decryption failed for ${studentEmail}:`, err.message);
     return res.status(400).send('Decryption failed');
   }
 
   console.log(`${serviceType} request received for ${studentEmail}`);
-  console.log('Decrypted password: ${decryptedPass}');
+  console.log(`Decrypted password: ${decryptedPass}`);
   console.log(`Degree: ${selectedDegreeNo}, Personas:`, [persona1, persona2, persona3, persona4]);
 
   // Simulate success
