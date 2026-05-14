@@ -1,50 +1,39 @@
-# Welcome to your Expo app 👋
+# Major Voyage
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Major Voyage is an interactive mobile application designed to help undecided college students explore potential majors based on personality, interests, and engagement through mini-games and assessments.
 
-## Get started
+The application provides users with a fun and personalized experience by combining personality-based recommendations, interactive challenges, and educational feedback to guide students toward majors that best fit their strengths and interests.
 
-1. Install dependencies
+## Features
 
-   ```bash
-   npm install
-   ```
+* Personality-based major recommendations
+* Interactive mini-games for different majors
+* User authentication and profile system
+* Animated onboarding experience
+* Score tracking and feedback system
+* Responsive mobile UI/UX design
+* Frontend and backend integration
 
-2. Start the app
+## Technologies Used
 
-   ```bash
-   npx expo start
-   ```
+* React Native
+* Expo
+* JavaScript
+* Node.js
+* Express.js
+* MySQL
+* GitHub
 
-In the output, you'll find options to open the app in a
+## My Contributions
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+* Frontend development using React Native
+* UI/UX design and screen layouts
+* Interactive game implementation
+* Navigation and onboarding flow development
+* Backend integration and testing
+* Team collaboration and GitHub version control
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Purpose
 
-## Get a fresh project
+Many college students struggle with choosing a major that aligns with their personality and interests. Major Voyage was created to provide a more engaging and interactive approach to career and major exploration through technology and gamified experiences.
 
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
